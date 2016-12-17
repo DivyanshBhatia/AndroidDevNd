@@ -1,0 +1,29 @@
+<resources>
+    <string name="app_name">PopularMoviesApp</string>
+    <string name="settings_popular_movies">popularMovies</string>
+    <string name="settings_top_rated_movies">topRatedMovies</string>
+    <!-- Strings For Order-By Preference [CHAR LIMIT=30] -->
+    <string name="settings_order_by_label">Order By</string>
+    <string name="settings_order_by_key" translatable="false">order_by</string>
+    <string name="settings_order_by_default" translatable="false">@string/settings_order_by_popular_value</string>
+
+    <!-- Label for order-by magnitude option [CHAR LIMIT=20] -->
+    <string name="settings_order_by_popular_label">Most Popular</string>
+    <string name="settings_order_by_popular_value" translatable="false">popularity</string>
+
+    <!-- Label for order-by most recent option [CHAR LIMIT=20] -->
+    <string name="settings_order_by_top_rated_label">Highest Rated</string>
+    <string name="settings_order_by_top_rated_value" translatable="false">topRated</string>
+    <string name="settings_menu_item">settings</string>
+    <string name="settings_title">Settings</string>
+    <string name="movie_poster_content">This resource is for Movie Posters</string>
+    <string name="no_internet_text">Oops! seems like you are missing internet connection. Unfortunately, we will not able to give you a rich experience without that. Please connect to net and try again.</string>
+    <string name="initial_text">We are loading high quality movies for you. Please Wait...</string>
+    <string name="no_result_text">Sorry for the inconvinience we are experiencing tech difficulty.</string>
+    <string name="check_connectivity">Net Check and Reload</string>
+    <string name="original_title">Original Title</string>
+    <string name="original_synopsis">Plot</string>
+    <string name="original_release_date">Release Date</string>
+    <string name="vote_rating">User Rating</string>
+
+</resources>
