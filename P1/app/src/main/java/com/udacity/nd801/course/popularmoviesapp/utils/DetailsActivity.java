@@ -3,8 +3,11 @@ package com.udacity.nd801.course.popularmoviesapp.utils;
 import android.content.Context;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.v4.app.NavUtils;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.MenuItem;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -34,6 +37,11 @@ public class DetailsActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_details);
+
+        ActionBar actionBar=this.getSupportActionBar();
+        if(actionBar!=null){
+            actionBar.setDisplayHomeAsUpEnabled(true);
+        }
         Bundle b = this.getIntent().getExtras();
         if (b != null) {
             mMovieData = b.getParcelable(MovieContract.getMovieObjectString());
@@ -66,5 +74,14 @@ public class DetailsActivity extends AppCompatActivity {
         movie_plot_synopsis.setText(mMovieData.getPlotSynopsis());
         movie_release_date.setText(mMovieData.getReleaseDate());
         movie_vote_rating.setText(mMovieData.getUserRating().toString());
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item){
+        int id=item.getItemId();
+        if(id==android.R.id.home){
+            finish();
+        }
+        return super.onOptionsItemSelected(item);
     }
 }
