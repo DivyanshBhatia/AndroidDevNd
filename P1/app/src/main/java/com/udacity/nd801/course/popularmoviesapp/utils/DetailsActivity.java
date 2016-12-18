@@ -7,6 +7,7 @@ import android.support.v4.app.NavUtils;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.util.TypedValue;
 import android.view.MenuItem;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -69,6 +70,14 @@ public class DetailsActivity extends AppCompatActivity {
             } catch (UnsupportedEncodingException e) {
                 Log.d(LOG_TAG,e.getMessage());
             }
+        }
+        String[] movieTitleWords=mMovieData.getOriginalTitle().split(" ");
+        if(movieTitleWords.length>6){
+            movie_original_title.setTextSize(TypedValue.COMPLEX_UNIT_PX,getResources().getDimension(R.dimen.medium_size_text));
+        } else if(movieTitleWords.length>3){
+            movie_original_title.setTextSize(TypedValue.COMPLEX_UNIT_PX,getResources().getDimension(R.dimen.heading_long_text_size));
+        } else{
+            movie_original_title.setTextSize(TypedValue.COMPLEX_UNIT_PX,getResources().getDimension(R.dimen.heading_text_size));
         }
         movie_original_title.setText(mMovieData.getOriginalTitle());
         movie_plot_synopsis.setText(mMovieData.getPlotSynopsis());

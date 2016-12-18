@@ -6,4 +6,8 @@
     <dimen name="main_text_size">16sp</dimen>
     <dimen name="padding_16_dp">16dp</dimen>
     <dimen name="main_image_height">180dp</dimen>
+    <dimen name="heading_text_size">45sp</dimen>
+    <dimen name="heading_long_text_size">34sp</dimen>
+    <dimen name="medium_size_text">24sp</dimen>
+    <dimen name="regular_device_text_size">16sp</dimen>
 </resources>

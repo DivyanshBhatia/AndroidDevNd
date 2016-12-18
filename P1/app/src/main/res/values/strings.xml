@@ -26,5 +26,8 @@
     <string name="original_release_date">Release Date</string>
     <string name="vote_rating">User Rating</string>
     <string name="movie_details_activity">Movie Details</string>
+    <string name="dummy_movie_text">Movie Title</string>
+    <string name="dummy_rating">10/10</string>
+    <string name="dummy_release_date">2016</string>
 
 </resources>
