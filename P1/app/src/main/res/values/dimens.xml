@@ -5,4 +5,5 @@
     <dimen name="padding_8_dp">8dp</dimen>
     <dimen name="main_text_size">16sp</dimen>
     <dimen name="padding_16_dp">16dp</dimen>
+    <dimen name="main_image_height">180dp</dimen>
 </resources>
