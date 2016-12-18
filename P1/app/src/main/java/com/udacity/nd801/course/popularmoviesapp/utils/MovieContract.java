@@ -13,6 +13,7 @@ public class MovieContract {
     private static final String MOVIE_ORIGINAL_TITLE = "original_title";
     private static final String MOVIE_RELEASE_DATE = "release_date";
     private static final String MOVIE_USER_RATING = "vote_average";
+    private static final String MOVIE_ID = "id";
     private static final String MOVIE_OBJECT_STRING = "movieObjectString";
 
 
@@ -42,6 +43,10 @@ public class MovieContract {
 
     public static String getMovieUserRating() {
         return MOVIE_USER_RATING;
+    }
+
+    public static String getMovieId() {
+        return MOVIE_ID;
     }
 
     public static String getMovieObjectString() {

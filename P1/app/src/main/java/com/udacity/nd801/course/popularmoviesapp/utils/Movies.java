@@ -9,42 +9,6 @@ import android.os.Parcelable;
  */
 
 public class Movies implements Parcelable {
-    private String originalTitle;
-    private String moviePosterUrl;
-    private String plotSynopsis;
-    private Double userRating;
-    private String releaseDate;
-
-    public Movies(String originalTitle,String moviePosterUrl,String plotSynopsis,Double userRating,String releaseDate){
-        this.originalTitle=originalTitle;
-        this.moviePosterUrl=moviePosterUrl;
-        this.plotSynopsis=plotSynopsis;
-        this.userRating=userRating;
-        this.releaseDate=releaseDate;
-    }
-
-    protected Movies(Parcel in) {
-        originalTitle = in.readString();
-        moviePosterUrl = in.readString();
-        plotSynopsis = in.readString();
-        releaseDate = in.readString();
-        userRating = in.readDouble();
-    }
-
-    @Override
-    public void writeToParcel(Parcel dest, int flags) {
-        dest.writeString(originalTitle);
-        dest.writeString(moviePosterUrl);
-        dest.writeString(plotSynopsis);
-        dest.writeString(releaseDate);
-        dest.writeDouble(userRating);
-    }
-
-    @Override
-    public int describeContents() {
-        return 0;
-    }
-
     public static final Creator<Movies> CREATOR = new Creator<Movies>() {
         @Override
         public Movies createFromParcel(Parcel in) {
@@ -56,6 +20,45 @@ public class Movies implements Parcelable {
             return new Movies[size];
         }
     };
+    private String originalTitle;
+    private String moviePosterUrl;
+    private String plotSynopsis;
+    private Double userRating;
+    private String releaseDate;
+    private String movieId;
+
+    public Movies(String movieId, String originalTitle, String moviePosterUrl, String plotSynopsis, Double userRating, String releaseDate) {
+        this.movieId = movieId;
+        this.originalTitle = originalTitle;
+        this.moviePosterUrl = moviePosterUrl;
+        this.plotSynopsis = plotSynopsis;
+        this.userRating = userRating;
+        this.releaseDate = releaseDate;
+    }
+
+    protected Movies(Parcel in) {
+        movieId = in.readString();
+        originalTitle = in.readString();
+        moviePosterUrl = in.readString();
+        plotSynopsis = in.readString();
+        releaseDate = in.readString();
+        userRating = in.readDouble();
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeString(movieId);
+        dest.writeString(originalTitle);
+        dest.writeString(moviePosterUrl);
+        dest.writeString(plotSynopsis);
+        dest.writeString(releaseDate);
+        dest.writeDouble(userRating);
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
 
     public String getMoviePosterUrl() {
         return moviePosterUrl;
@@ -77,8 +80,12 @@ public class Movies implements Parcelable {
         return releaseDate;
     }
 
+    public String getMovieId() {
+        return movieId;
+    }
+
     @Override
-    public String toString(){
-        return moviePosterUrl+";"+originalTitle+";"+plotSynopsis.substring(0,10)+";"+userRating+";"+releaseDate+";";
+    public String toString() {
+        return movieId + ";" + moviePosterUrl + ";" + originalTitle + ";" + plotSynopsis.substring(0, 10) + ";" + userRating + ";" + releaseDate + ";";
     }
 }

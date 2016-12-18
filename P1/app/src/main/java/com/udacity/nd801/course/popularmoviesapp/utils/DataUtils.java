@@ -129,6 +129,7 @@ public class DataUtils  {
                 String posterPath=null;
                 String snippet=null;
                 String movieTitle=null;
+                String movieId = null;
                 String releaseDate=null;
                 Double userRating=null;
 
@@ -149,7 +150,10 @@ public class DataUtils  {
                 if(currentMovie.has(MovieContract.getMovieUserRating()))
                 userRating = currentMovie.getDouble(MovieContract.getMovieUserRating());
 
-                Movies movie = new Movies(movieTitle, posterPath, snippet,userRating, releaseDate);
+                if(currentMovie.has(MovieContract.getMovieId()))
+                    movieId = currentMovie.getString(MovieContract.getMovieId());
+
+                Movies movie = new Movies(movieId,movieTitle, posterPath, snippet,userRating, releaseDate);
 
                 // Add the new {@link Movie} to the list of movies.
                 movies.add(movie);

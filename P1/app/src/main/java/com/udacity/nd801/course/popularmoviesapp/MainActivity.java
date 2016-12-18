@@ -237,7 +237,7 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Movi
 
     @Override
     public void onClick(String position) {
-        Log.v(LOG_TAG,"Clicking on item");
+
         Context context = this;
         Class destinationClass = DetailsActivity.class;
         Intent intentToStartDetailActivity = new Intent(context, destinationClass);
