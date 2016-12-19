@@ -90,7 +90,19 @@
                     android:padding="@dimen/padding_8_dp"
                     android:textSize="@dimen/regular_device_text_size" />
             </LinearLayout>
+            <FrameLayout
+                android:layout_weight="0.2"
+                android:layout_width="match_parent"
+                android:layout_height="0dp">
+
+                <android.support.v7.widget.RecyclerView
+                    android:id="@+id/recyclerview_trailers"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:scrollbars="vertical" />
+            </FrameLayout>
         </LinearLayout>
+
     </ScrollView>
 
 </LinearLayout>

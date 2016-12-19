@@ -29,7 +29,7 @@ public class DataUtils  {
     private DataUtils() {
     }
 
-    public static List<Movies> fetchMoviesData(String requestUrl) {
+    public static String fetchMoviesData(String requestUrl) {
         // Create URL object
         URL url = createUrl(requestUrl);
 
@@ -41,11 +41,8 @@ public class DataUtils  {
             Log.e(LOG_TAG, "Problem making the HTTP request.", e);
         }
 
-        // Extract relevant fields from the JSON response and create a list of {@link Movies}s
-        List<Movies> movies = extractFeatureFromJson(jsonResponse);
-
         // Return the list of {@link Movies}s
-        return movies;
+        return jsonResponse;
     }
 
     private static String makeHttpRequest(URL url) throws IOException {
@@ -102,7 +99,7 @@ public class DataUtils  {
         return output.toString();
     }
 
-    private static List<Movies> extractFeatureFromJson(String moviesJSON) {
+    public static List<Movies> extractFeatureFromJson(String moviesJSON) {
         // If the JSON string is empty or null, then return early.
         if (TextUtils.isEmpty(moviesJSON)) {
             return null;
@@ -168,6 +165,42 @@ public class DataUtils  {
 
         // Return the list of movies
         return movies;
+    }
+
+    public static MovieDetails extractFeatureTrailerFromJson(String moviesTrailerJSON,String movieReviewJSON) {
+
+        // If the JSON string is empty or null, then return early.
+        if (TextUtils.isEmpty(moviesTrailerJSON)) {
+            return null;
+        }
+
+        List<Trailers> movieTrailers=new ArrayList<>();
+        try {
+            // Create a JSONObject from the JSON response string
+            JSONObject baseJsonResponse = new JSONObject(moviesTrailerJSON);
+            JSONArray movieArray = baseJsonResponse.getJSONArray(MovieContract.getMovieObjectResults());
+            for (int i = 0; i < movieArray.length(); i++) {
+                JSONObject currentVideo = movieArray.getJSONObject(i);
+                if(currentVideo.has(MovieContract.getMovieTrailerTypeKey()) && currentVideo.getString(MovieContract.getMovieTrailerTypeKey()).equalsIgnoreCase(MovieContract.getMovieTrailerTypeValue()))
+                if(currentVideo.has(MovieContract.getMovieTrailerSiteKey()) && currentVideo.getString(MovieContract.getMovieTrailerSiteKey()).equalsIgnoreCase(MovieContract.getMovieTrailerSiteValue())) {
+                    String trailerName=null;
+                    String trailerKey=null;
+                    if (currentVideo.has(MovieContract.getMovieTrailerKey())) {
+                        trailerKey=currentVideo.getString(MovieContract.getMovieTrailerKey());
+                    }
+                    if (currentVideo.has(MovieContract.getMovieTrailerNameKey())) {
+                        trailerName=currentVideo.getString(MovieContract.getMovieTrailerNameKey());
+                    }
+                    Trailers trailer = new Trailers(trailerKey,trailerName);
+                    movieTrailers.add(trailer);
+                }
+
+            }
+        } catch (JSONException e) {
+            Log.e(LOG_TAG, "Problem parsing the movies JSON results", e);
+        }
+
+        return new MovieDetails(movieTrailers);
     }
 
 

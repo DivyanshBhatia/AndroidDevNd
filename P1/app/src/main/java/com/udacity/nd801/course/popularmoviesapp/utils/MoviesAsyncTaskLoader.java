@@ -59,7 +59,7 @@ public class MoviesAsyncTaskLoader extends AsyncTaskLoader<List<Movies>> {
         }
 
         // Perform the network request, parse the response, and extract a list of books.
-        List<Movies> movies = DataUtils.fetchMoviesData(mUrl);
+        List<Movies> movies = DataUtils.extractFeatureFromJson(DataUtils.fetchMoviesData(mUrl));
         if (movies != null)
             Log.d(LOG_TAG, movies.toString());
         return movies;

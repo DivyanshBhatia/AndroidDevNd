@@ -92,7 +92,7 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieViewHol
     }
 
     public interface MovieAdapterOnClickHandler {
-        void onClick(String weatherForDay);
+        void onClick(String movie);
     }
 
     public interface OnLoadMoreListener {

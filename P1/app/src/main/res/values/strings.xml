@@ -29,5 +29,6 @@
     <string name="dummy_movie_text">Movie Title</string>
     <string name="dummy_rating">10/10</string>
     <string name="dummy_release_date">2016</string>
+    <string name="dummy_trailer">Trailer</string>
 
 </resources>

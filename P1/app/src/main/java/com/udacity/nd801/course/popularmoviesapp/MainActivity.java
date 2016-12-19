@@ -39,7 +39,6 @@ API_KEY_HERE in this file.
 public class MainActivity extends AppCompatActivity implements MovieAdapter.MovieAdapterOnClickHandler, LoaderManager.LoaderCallbacks<List<Movies>> {
 
     private static final String MOVIE_DB_REQUEST_URL = "https://api.themoviedb.org/3";
-    private static final String API_KEY = "API_KEY_HERE";
     private static final int MOVIE_LOADER_ID = 1;
     private static final String LOG_TAG = MainActivity.class.getName();
     private static final int LOAD_MORE_MOVIE_ID = 2;
@@ -140,7 +139,7 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Movi
             uriBuilder.appendPath("movie");
             uriBuilder.appendPath("top_rated");
         }
-        uriBuilder.appendQueryParameter("api_key", API_KEY);
+        uriBuilder.appendQueryParameter("api_key", MovieContract.getApiKey());
         uriBuilder.appendQueryParameter("page", String.valueOf(pageId));
         Log.v(MainActivity.class.getName(), uriBuilder.toString());
         mLoadingIndicator = (ProgressBar) findViewById(R.id.pb_loading_indicator);
@@ -207,7 +206,6 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Movi
     }
 
     private void intersectList(List<Movies> movieList1,List<Movies> movieList2){
-        /*Log.v(LOG_TAG,"intersectList"+movieList2.size());*/
         int tempListSize=movieList2.size();
         for(Movies movie:movieList1){
             boolean movieFlag=false;
@@ -229,7 +227,7 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Movi
         }
     }
     public boolean checkConnectivity(){
-        ConnectivityManager cm = (ConnectivityManager) this.getSystemService(Context.CONNECTIVITY_SERVICE);
+        ConnectivityManager cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
         boolean isConnected = activeNetwork != null && activeNetwork.isConnectedOrConnecting();
         return isConnected;

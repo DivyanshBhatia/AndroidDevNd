@@ -1,16 +1,23 @@
 package com.udacity.nd801.course.popularmoviesapp.utils;
 
+import android.app.LoaderManager;
 import android.content.Context;
+import android.content.Intent;
+import android.content.Loader;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Bundle;
-import android.support.v4.app.NavUtils;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.MenuItem;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.squareup.picasso.Picasso;
 import com.udacity.nd801.course.popularmoviesapp.R;
@@ -19,6 +26,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLDecoder;
+import java.util.List;
 
 /**
  * Created by dnbhatia on 12/17/2016.
@@ -26,14 +34,19 @@ import java.net.URLDecoder;
  * It displays the details of selected movie
  */
 
-public class DetailsActivity extends AppCompatActivity {
+public class DetailsActivity extends AppCompatActivity implements TrailerAdapter.TrailerAdapterOnClickHandler,LoaderManager.LoaderCallbacks<MovieDetails>{
     private static final String LOG_TAG= DetailsActivity.class.getName();
+    private static final int TRAILER_LOADER_ID = 3;
     private ImageView movie_image_view;
     private TextView movie_original_title;
     private TextView movie_release_date;
     private TextView movie_vote_rating;
     private TextView movie_plot_synopsis;
     private Movies mMovieData;
+    private MovieDetails movieDetails;
+    private RecyclerView mRecyclerView;
+    private TrailerAdapter mTrailerAdapter;
+    private static LoaderManager trailerLoaderManager;
 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -48,7 +61,27 @@ public class DetailsActivity extends AppCompatActivity {
             mMovieData = b.getParcelable(MovieContract.getMovieObjectString());
             Log.v(LOG_TAG,mMovieData.toString());
         }
+        initLayout();
+        if(checkConnectivity()) {
+            trailerLoaderManager = getLoaderManager();
+            trailerLoaderManager.initLoader(TRAILER_LOADER_ID, null, this);
+        } else{
+            Toast.makeText(getApplicationContext(),getResources().getString(R.string.no_internet_text),Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    /*
+    The initLayout method is used to initialize Layouts
+     */
+    private void initLayout(){
         String posterPath=mMovieData.getMoviePosterUrl();
+        mRecyclerView = (RecyclerView) findViewById(R.id.recyclerview_trailers);
+        mRecyclerView.setHasFixedSize(true);
+        LinearLayoutManager layoutManager
+                = new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false);
+        mTrailerAdapter = new TrailerAdapter(this);
+        mRecyclerView.setLayoutManager(layoutManager);
+        mRecyclerView.setAdapter(mTrailerAdapter);
         movie_image_view=(ImageView)findViewById(R.id.detail_image_id);
         movie_original_title=(TextView)findViewById(R.id.detail_title_value);
         movie_release_date=(TextView)findViewById(R.id.release_date_value);
@@ -85,6 +118,29 @@ public class DetailsActivity extends AppCompatActivity {
         movie_vote_rating.setText(mMovieData.getUserRating().toString());
     }
 
+    private String generateTrailerDataUrls(Uri baseUri) {
+        String trailerUrl = null;
+        String movieId = mMovieData.getMovieId();
+        baseUri = Uri.parse(MovieContract.getBaseMovieUrl());
+        Uri.Builder trailerUriBuilder = baseUri.buildUpon();
+        trailerUriBuilder.appendPath(movieId);
+        trailerUriBuilder.appendPath("videos");
+        trailerUriBuilder.appendQueryParameter("api_key", MovieContract.getApiKey());
+        trailerUrl = trailerUriBuilder.toString();
+        return trailerUrl;
+    }
+    private String generateReviewsDataUrls(Uri baseUri) {
+        String reviewsUrl = null;
+        String movieId = mMovieData.getMovieId();
+        Uri.Builder reviewsUriBuilder = baseUri.buildUpon();
+        reviewsUriBuilder.appendPath(movieId);
+        reviewsUriBuilder.appendPath("reviews");
+        reviewsUriBuilder.appendQueryParameter("api_key", MovieContract.getApiKey());
+        reviewsUrl=reviewsUriBuilder.toString();
+        return reviewsUrl;
+
+    }
+
     @Override
     public boolean onOptionsItemSelected(MenuItem item){
         int id=item.getItemId();
@@ -92,5 +148,41 @@ public class DetailsActivity extends AppCompatActivity {
             finish();
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public Loader<MovieDetails> onCreateLoader(int i, Bundle bundle) {
+        Uri baseUri = Uri.parse(MovieContract.getBaseMovieUrl());
+        String trailerUrl=generateTrailerDataUrls(baseUri);
+        String reviewsUrl=generateReviewsDataUrls(baseUri);
+
+        return new MovieDetailsAsyncTaskLoader(this, trailerUrl, reviewsUrl);
+    }
+
+    @Override
+    public void onLoadFinished(Loader<MovieDetails> loader, MovieDetails movieDetails) {
+        mTrailerAdapter.setTrailerData(movieDetails.getmTrailers());
+        this.movieDetails=movieDetails;
+    }
+
+    @Override
+    public void onLoaderReset(Loader<MovieDetails> loader) {
+
+    }
+
+    @Override
+    public void onClick(String position) {
+        int trailerPos=Integer.parseInt(position);
+        Uri baseUri=Uri.parse(MovieContract.getMovieYoutubeUrl());
+        Uri.Builder uriBuilder = baseUri.buildUpon();
+        uriBuilder.appendQueryParameter("v",movieDetails.getmTrailers().get(trailerPos).getTrailerKey());
+        startActivity(new Intent(Intent.ACTION_VIEW, uriBuilder.build()));
+    }
+
+    public boolean checkConnectivity(){
+        ConnectivityManager cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
+        boolean isConnected = activeNetwork != null && activeNetwork.isConnectedOrConnecting();
+        return isConnected;
     }
 }
