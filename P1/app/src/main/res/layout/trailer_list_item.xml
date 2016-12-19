@@ -10,8 +10,9 @@
         android:layout_height="match_parent"
         android:fontFamily="sans-serif"
         android:padding="@dimen/padding_16_dp"
-        android:textSize="@dimen/medium_size_text"
+        android:textSize="@dimen/regular_device_text_size"
         android:textStyle="bold"
+        android:background="@drawable/border_lines"
         tools:text="@string/dummy_trailer" />
 
 </RelativeLayout>

@@ -30,5 +30,6 @@
     <string name="dummy_rating">10/10</string>
     <string name="dummy_release_date">2016</string>
     <string name="dummy_trailer">Trailer</string>
+    <string name="movie_video_section_label">Trailers:</string>
 
 </resources>
