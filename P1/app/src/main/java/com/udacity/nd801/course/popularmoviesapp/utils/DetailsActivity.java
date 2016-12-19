@@ -15,6 +15,7 @@ import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -163,6 +164,12 @@ public class DetailsActivity extends AppCompatActivity implements TrailerAdapter
     public void onLoadFinished(Loader<MovieDetails> loader, MovieDetails movieDetails) {
         mTrailerAdapter.setTrailerData(movieDetails.getmTrailers());
         this.movieDetails=movieDetails;
+        TextView video_section_label_view=((TextView) findViewById(R.id.movie_video_section_label));
+        if(movieDetails.getmTrailers().size()==0) {
+            video_section_label_view.setVisibility(View.GONE);
+        } else{
+            video_section_label_view.setVisibility(View.VISIBLE);
+        }
     }
 
     @Override
