@@ -35,7 +35,7 @@ import java.util.List;
  * It displays the details of selected movie
  */
 
-public class DetailsActivity extends AppCompatActivity implements TrailerAdapter.TrailerAdapterOnClickHandler, LoaderManager.LoaderCallbacks<MovieDetails>{
+public class DetailsActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<MovieDetails>{
     private static final String LOG_TAG= DetailsActivity.class.getName();
     private static final int TRAILER_LOADER_ID = 3;
     private ImageView movie_image_view;
@@ -83,7 +83,7 @@ public class DetailsActivity extends AppCompatActivity implements TrailerAdapter
         mTrailerRecyclerView.setHasFixedSize(true);
         LinearLayoutManager trailerLayoutManager
                 = new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false);
-        mTrailerAdapter = new TrailerAdapter(this);
+        mTrailerAdapter = new TrailerAdapter();
 
         mTrailerRecyclerView.setLayoutManager(trailerLayoutManager);
         mTrailerRecyclerView.setAdapter(mTrailerAdapter);
@@ -198,15 +198,6 @@ public class DetailsActivity extends AppCompatActivity implements TrailerAdapter
     @Override
     public void onLoaderReset(Loader<MovieDetails> loader) {
 
-    }
-
-    @Override
-    public void onClick(String position) {
-        int trailerPos=Integer.parseInt(position);
-        Uri baseUri=Uri.parse(MovieContract.getMovieYoutubeUrl());
-        Uri.Builder uriBuilder = baseUri.buildUpon();
-        uriBuilder.appendQueryParameter("v",movieDetails.getmTrailers().get(trailerPos).getTrailerKey());
-        startActivity(new Intent(Intent.ACTION_VIEW, uriBuilder.build()));
     }
 
     public boolean checkConnectivity(){

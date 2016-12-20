@@ -1,6 +1,8 @@
 package com.udacity.nd801.course.popularmoviesapp.utils;
 
 import android.content.Context;
+import android.content.Intent;
+import android.net.Uri;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -19,12 +21,7 @@ import java.util.List;
 
 public class TrailerAdapter extends RecyclerView.Adapter<TrailerAdapter.TrailerViewHolder> {
     private static final String TAG = TrailerAdapter.class.getSimpleName();
-    private final TrailerAdapter.TrailerAdapterOnClickHandler mClickHandler;
     private List<Trailers> mTrailerData;
-
-    public TrailerAdapter(TrailerAdapter.TrailerAdapterOnClickHandler clickHandler) {
-        mClickHandler = clickHandler;
-    }
 
     @Override
     public TrailerAdapter.TrailerViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
@@ -39,9 +36,18 @@ public class TrailerAdapter extends RecyclerView.Adapter<TrailerAdapter.TrailerV
     }
 
     @Override
-    public void onBindViewHolder(TrailerAdapter.TrailerViewHolder holder, int position) {
-        Trailers trailer = mTrailerData.get(position);
+    public void onBindViewHolder(final TrailerAdapter.TrailerViewHolder holder, int position) {
+        final Trailers trailer = mTrailerData.get(position);
         holder.mMovieTrailerView.setText(trailer.getTrailerName());
+        holder.mMovieTrailerView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Uri baseUri=Uri.parse(MovieContract.getMovieYoutubeUrl());
+                Uri.Builder uriBuilder = baseUri.buildUpon();
+                uriBuilder.appendQueryParameter("v",trailer.getTrailerKey());
+                holder.mMovieTrailerView.getContext().startActivity(new Intent(Intent.ACTION_VIEW, uriBuilder.build()));
+            }
+        });
 
     }
 
@@ -51,7 +57,7 @@ public class TrailerAdapter extends RecyclerView.Adapter<TrailerAdapter.TrailerV
         return mTrailerData.size();
     }
 
-    class TrailerViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
+    class TrailerViewHolder extends RecyclerView.ViewHolder {
 
         // Will display the position in the list, ie 0 through getItemCount() - 1
         public final TextView mMovieTrailerView;
@@ -67,18 +73,8 @@ public class TrailerAdapter extends RecyclerView.Adapter<TrailerAdapter.TrailerV
         public TrailerViewHolder(View itemView) {
             super(itemView);
             mMovieTrailerView = (TextView) itemView.findViewById(R.id.id_movie_trailer);
-            mMovieTrailerView.setOnClickListener(this);
         }
 
-        @Override
-        public void onClick(View v) {
-            int adapterPosition = getAdapterPosition();
-            mClickHandler.onClick(String.valueOf(adapterPosition));
-        }
-    }
-
-    public interface TrailerAdapterOnClickHandler {
-        void onClick(String trailer);
     }
 
     public void setTrailerData(List<Trailers> movieData) {
