@@ -97,7 +97,9 @@
                 android:layout_height="wrap_content"
                 android:padding="@dimen/padding_8_dp"
                 android:text="@string/movie_video_section_label"
-                android:textSize="@dimen/medium_size_text" />
+                android:textSize="@dimen/medium_size_text"
+                android:visibility="gone"
+                />
 
             <FrameLayout
                 android:layout_width="match_parent"
@@ -112,6 +114,29 @@
                     android:layout_height="match_parent"
                     android:scrollbars="vertical" />
             </FrameLayout>
+            <TextView
+                android:id="@+id/movie_review_section_label"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:padding="@dimen/padding_8_dp"
+                android:text="@string/movie_review_section_label"
+                android:textSize="@dimen/medium_size_text"
+                android:visibility="gone"
+                />
+
+            <FrameLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingBottom="@dimen/padding_8_dp"
+                android:paddingLeft="@dimen/padding_8_dp">
+
+                <android.support.v7.widget.RecyclerView
+                    android:id="@+id/recyclerview_reviews"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:scrollbars="vertical" />
+            </FrameLayout>
+
         </LinearLayout>
 
     </ScrollView>

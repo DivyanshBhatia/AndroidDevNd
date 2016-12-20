@@ -35,7 +35,7 @@ import java.util.List;
  * It displays the details of selected movie
  */
 
-public class DetailsActivity extends AppCompatActivity implements TrailerAdapter.TrailerAdapterOnClickHandler,LoaderManager.LoaderCallbacks<MovieDetails>{
+public class DetailsActivity extends AppCompatActivity implements TrailerAdapter.TrailerAdapterOnClickHandler, LoaderManager.LoaderCallbacks<MovieDetails>{
     private static final String LOG_TAG= DetailsActivity.class.getName();
     private static final int TRAILER_LOADER_ID = 3;
     private ImageView movie_image_view;
@@ -45,8 +45,10 @@ public class DetailsActivity extends AppCompatActivity implements TrailerAdapter
     private TextView movie_plot_synopsis;
     private Movies mMovieData;
     private MovieDetails movieDetails;
-    private RecyclerView mRecyclerView;
+    private RecyclerView mTrailerRecyclerView;
+    private RecyclerView mReviewRecyclerView;
     private TrailerAdapter mTrailerAdapter;
+    private ReviewAdapter mReviewAdapter;
     private static LoaderManager trailerLoaderManager;
 
     protected void onCreate(Bundle savedInstanceState) {
@@ -76,13 +78,26 @@ public class DetailsActivity extends AppCompatActivity implements TrailerAdapter
      */
     private void initLayout(){
         String posterPath=mMovieData.getMoviePosterUrl();
-        mRecyclerView = (RecyclerView) findViewById(R.id.recyclerview_trailers);
-        mRecyclerView.setHasFixedSize(true);
-        LinearLayoutManager layoutManager
+        //Trailer Recycle view initialize
+        mTrailerRecyclerView = (RecyclerView) findViewById(R.id.recyclerview_trailers);
+        mTrailerRecyclerView.setHasFixedSize(true);
+        LinearLayoutManager trailerLayoutManager
                 = new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false);
         mTrailerAdapter = new TrailerAdapter(this);
-        mRecyclerView.setLayoutManager(layoutManager);
-        mRecyclerView.setAdapter(mTrailerAdapter);
+
+        mTrailerRecyclerView.setLayoutManager(trailerLayoutManager);
+        mTrailerRecyclerView.setAdapter(mTrailerAdapter);
+
+        //Reviews Recycle view initialize
+        mReviewRecyclerView = (RecyclerView) findViewById(R.id.recyclerview_reviews);
+        mReviewRecyclerView.setHasFixedSize(true);
+        LinearLayoutManager reviewLayoutManager
+                = new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false);
+        mReviewRecyclerView.setLayoutManager(reviewLayoutManager);
+        mReviewAdapter=new ReviewAdapter();
+        mReviewRecyclerView.setAdapter(mReviewAdapter);
+
+        //Initialize Detail Layout
         movie_image_view=(ImageView)findViewById(R.id.detail_image_id);
         movie_original_title=(TextView)findViewById(R.id.detail_title_value);
         movie_release_date=(TextView)findViewById(R.id.release_date_value);
@@ -163,12 +178,20 @@ public class DetailsActivity extends AppCompatActivity implements TrailerAdapter
     @Override
     public void onLoadFinished(Loader<MovieDetails> loader, MovieDetails movieDetails) {
         mTrailerAdapter.setTrailerData(movieDetails.getmTrailers());
+        mReviewAdapter.setReviewData(movieDetails.getmReviews());
         this.movieDetails=movieDetails;
         TextView video_section_label_view=((TextView) findViewById(R.id.movie_video_section_label));
+        TextView review_section_label_view=((TextView) findViewById(R.id.movie_review_section_label));
         if(movieDetails.getmTrailers().size()==0) {
             video_section_label_view.setVisibility(View.GONE);
         } else{
             video_section_label_view.setVisibility(View.VISIBLE);
+        }
+
+        if(movieDetails.getmReviews().size()==0) {
+            review_section_label_view.setVisibility(View.GONE);
+        } else{
+            review_section_label_view.setVisibility(View.VISIBLE);
         }
     }
 

@@ -8,11 +8,17 @@ import java.util.List;
 
 public class MovieDetails {
     private List<Trailers> mTrailers;
-    public MovieDetails(List<Trailers> trailers){
+    private List<Reviews> mReviews;
+    public MovieDetails(List<Trailers> trailers,List<Reviews> reviews){
         this.mTrailers=trailers;
+        this.mReviews=reviews;
     }
 
     public List<Trailers> getmTrailers() {
         return mTrailers;
+    }
+
+    public List<Reviews> getmReviews() {
+        return mReviews;
     }
 }

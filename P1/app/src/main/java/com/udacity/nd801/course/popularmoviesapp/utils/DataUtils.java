@@ -175,6 +175,9 @@ public class DataUtils  {
         }
 
         List<Trailers> movieTrailers=new ArrayList<>();
+        List<Reviews> movieReviews=new ArrayList<>();
+
+        //Feteching Trailers
         try {
             // Create a JSONObject from the JSON response string
             JSONObject baseJsonResponse = new JSONObject(moviesTrailerJSON);
@@ -182,25 +185,51 @@ public class DataUtils  {
             for (int i = 0; i < movieArray.length(); i++) {
                 JSONObject currentVideo = movieArray.getJSONObject(i);
                 if(currentVideo.has(MovieContract.getMovieTrailerTypeKey()) && currentVideo.getString(MovieContract.getMovieTrailerTypeKey()).equalsIgnoreCase(MovieContract.getMovieTrailerTypeValue()))
-                if(currentVideo.has(MovieContract.getMovieTrailerSiteKey()) && currentVideo.getString(MovieContract.getMovieTrailerSiteKey()).equalsIgnoreCase(MovieContract.getMovieTrailerSiteValue())) {
-                    String trailerName=null;
-                    String trailerKey=null;
-                    if (currentVideo.has(MovieContract.getMovieTrailerKey())) {
-                        trailerKey=currentVideo.getString(MovieContract.getMovieTrailerKey());
+                    if(currentVideo.has(MovieContract.getMovieTrailerSiteKey()) && currentVideo.getString(MovieContract.getMovieTrailerSiteKey()).equalsIgnoreCase(MovieContract.getMovieTrailerSiteValue())) {
+                        String trailerName=null;
+                        String trailerKey=null;
+                        if (currentVideo.has(MovieContract.getMovieTrailerKey())) {
+                            trailerKey=currentVideo.getString(MovieContract.getMovieTrailerKey());
+                        }
+                        if (currentVideo.has(MovieContract.getMovieTrailerNameKey())) {
+                            trailerName=currentVideo.getString(MovieContract.getMovieTrailerNameKey());
+                        }
+                        Trailers trailer = new Trailers(trailerKey,trailerName);
+                        movieTrailers.add(trailer);
                     }
-                    if (currentVideo.has(MovieContract.getMovieTrailerNameKey())) {
-                        trailerName=currentVideo.getString(MovieContract.getMovieTrailerNameKey());
-                    }
-                    Trailers trailer = new Trailers(trailerKey,trailerName);
-                    movieTrailers.add(trailer);
-                }
 
             }
         } catch (JSONException e) {
             Log.e(LOG_TAG, "Problem parsing the movies JSON results", e);
         }
 
-        return new MovieDetails(movieTrailers);
+        //Feteching Reviews
+        try {
+            // Create a JSONObject from the JSON response string
+            JSONObject baseJsonResponse = new JSONObject(movieReviewJSON);
+            JSONArray movieArray = baseJsonResponse.getJSONArray(MovieContract.getMovieObjectResults());
+            for (int i = 0; i < movieArray.length(); i++) {
+                JSONObject currentReview = movieArray.getJSONObject(i);
+                String reviewAuthorName=null;
+                String reviewContent=null;
+                String reviewUrl=null;
+                if (currentReview.has(MovieContract.getMovieReviewAuthorKey())) {
+                    reviewAuthorName=currentReview.getString(MovieContract.getMovieReviewAuthorKey());
+                }
+                if (currentReview.has(MovieContract.getMovieReviewContentKey())) {
+                    reviewContent=currentReview.getString(MovieContract.getMovieReviewContentKey());
+                }
+                if (currentReview.has(MovieContract.getMovieReviewUrlKey())) {
+                    reviewUrl=currentReview.getString(MovieContract.getMovieReviewUrlKey());
+                }
+                Reviews review = new Reviews(reviewAuthorName,reviewContent,reviewUrl);
+                movieReviews.add(review);
+            }
+        } catch (JSONException e) {
+            Log.e(LOG_TAG, "Problem parsing the movies JSON results", e);
+        }
+
+        return new MovieDetails(movieTrailers,movieReviews);
     }
 
 

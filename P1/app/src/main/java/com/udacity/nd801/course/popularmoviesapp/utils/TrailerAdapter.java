@@ -42,7 +42,7 @@ public class TrailerAdapter extends RecyclerView.Adapter<TrailerAdapter.TrailerV
     public void onBindViewHolder(TrailerAdapter.TrailerViewHolder holder, int position) {
         Trailers trailer = mTrailerData.get(position);
         holder.mMovieTrailerView.setText(trailer.getTrailerName());
-        Log.v(TAG,"..............."+trailer.getTrailerName());
+
     }
 
     @Override

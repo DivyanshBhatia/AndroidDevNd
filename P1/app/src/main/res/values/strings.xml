@@ -31,5 +31,9 @@
     <string name="dummy_release_date">2016</string>
     <string name="dummy_trailer">Trailer</string>
     <string name="movie_video_section_label">Trailers:</string>
+    <string name="review_content_dummy">This is dummy review content....</string>
+    <string name="review_author_dummy">Dummy Author</string>
+    <string name="review_read_more">Read More..</string>
+    <string name="movie_review_section_label">Reviews</string>
 
 </resources>
