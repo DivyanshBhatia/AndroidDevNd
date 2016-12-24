@@ -6,7 +6,7 @@ package com.udacity.nd801.course.popularmoviesapp.utils;
  */
 
 public class MovieContract {
-    private static final String BASE_IMAGE_URL = "http://image.tmdb.org";
+    private static final String BASE_IMAGE_URL = "https://image.tmdb.org";
     private static final String BASE_MOVIE_URL = "https://api.themoviedb.org/3/movie";
     private static final String API_KEY = "API_KEY_HERE";
     private static final String BASE_IMAGE_SETTINGS = "t/p/w185";
