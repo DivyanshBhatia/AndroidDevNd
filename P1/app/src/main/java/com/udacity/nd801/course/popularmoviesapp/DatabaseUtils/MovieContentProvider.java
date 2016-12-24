@@ -41,7 +41,18 @@ public class MovieContentProvider extends ContentProvider {
     @Nullable
     @Override
     public Cursor query(Uri uri, String[] strings, String s, String[] strings1, String s1) {
-        return null;
+        final SQLiteDatabase moviesDb=mMovieDbHelper.getReadableDatabase();
+        int match=sUriMatcher.match(uri);
+        Cursor cursor=null;
+        switch(match){
+            case MOVIE_TASKS:
+                cursor=moviesDb.query(FavoritesReaderContract.FavoritesEntry.TABLE_NAME,strings,s,strings1,null,null,s1);
+                break;
+            default:
+                throw new UnsupportedOperationException("Uri not found:"+uri);
+        }
+        cursor.setNotificationUri(getContext().getContentResolver(), uri);
+        return cursor;
     }
 
     @Nullable

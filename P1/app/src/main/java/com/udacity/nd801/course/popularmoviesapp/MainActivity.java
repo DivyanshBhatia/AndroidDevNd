@@ -36,7 +36,7 @@ import java.util.List;
 In this class we use TMDB API to fetch movies. To run this code you will need to generate API_KEY for TMDB and replace with
 API_KEY_HERE in this file.
  */
-public class MainActivity extends AppCompatActivity implements MovieAdapter.MovieAdapterOnClickHandler, LoaderManager.LoaderCallbacks<List<Movies>> {
+public class MainActivity extends AppCompatActivity implements MovieAdapter.MovieAdapterOnClickHandler {
 
     private static final String MOVIE_DB_REQUEST_URL = "https://api.themoviedb.org/3";
     private static final int MOVIE_LOADER_ID = 1;
@@ -50,10 +50,84 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Movi
     private ProgressBar mLoadingIndicator;
     private TextView mEmptyStateTextView;
     private Button checkConnectivityButton;
+    private Context context;
+
+    /*
+    -------------Start Declaring Loaders in this section ------------------
+     */
+    private LoaderManager.LoaderCallbacks<List<Movies>> movieLoader=new LoaderManager.LoaderCallbacks<List<Movies>>(){
+
+        @Override
+        public Loader<List<Movies>> onCreateLoader(int i, Bundle bundle) {
+            SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(context);
+            String sortOrder = sharedPrefs.getString(
+                    getString(R.string.settings_order_by_key),
+                    getString(R.string.settings_order_by_default));
+
+            Log.v(MainActivity.class.getName(), "3" + sortOrder);
+            Uri baseUri = Uri.parse(MOVIE_DB_REQUEST_URL);
+            Uri.Builder uriBuilder = baseUri.buildUpon();
+            if (sortOrder.equals("popularity")) {
+                uriBuilder.appendPath("movie");
+                uriBuilder.appendPath("popular");
+            } else if (sortOrder.equals("topRated")) {
+                uriBuilder.appendPath("movie");
+                uriBuilder.appendPath("top_rated");
+            }
+            uriBuilder.appendQueryParameter("api_key", MovieContract.getApiKey());
+            uriBuilder.appendQueryParameter("page", String.valueOf(pageId));
+            Log.v(MainActivity.class.getName(), uriBuilder.toString());
+            mLoadingIndicator = (ProgressBar) findViewById(R.id.pb_loading_indicator);
+            mLoadingIndicator.setVisibility(View.VISIBLE);
+            return new MoviesAsyncTaskLoader(context, uriBuilder.toString());
+        }
+
+        @Override
+        public void onLoadFinished(Loader<List<Movies>> loader, List<Movies> movies) {
+
+            mLoadingIndicator.setVisibility(View.INVISIBLE);
+            if (movieList == null)
+                movieList = new ArrayList<>();
+            if (movies != null) {
+                checkConnectivityButton.setVisibility(View.INVISIBLE);
+                mEmptyStateTextView.setText(null);
+                intersectList(movies, movieList);
+            } else if(movieList==null){
+                mEmptyStateTextView.setText(R.string.no_result_text);
+            }
+            switch (loader.getId()) {
+                case MOVIE_LOADER_ID:
+                    mAdapter.setMovieData(movies);
+                    if (null == movies) {
+                        Log.v(LOG_TAG, "No movies");
+                    } else {
+                        showMovieDataView();
+                    }
+                    break;
+                case LOAD_MORE_MOVIE_ID:
+                    if (null != movies) {
+                        mAdapter.setMovieData(movieList);
+                        mAdapter.notifyDataChanged();
+                    }
+                    break;
+            }
+        }
+
+        @Override
+        public void onLoaderReset(Loader<List<Movies>> loader) {
+
+        }
+
+    };
+    /*
+    --------------End Declaring Loaders------------
+     */
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        context=getApplicationContext();
         setContentView(R.layout.activity_main);
 
         mLoadingIndicator = (ProgressBar) findViewById(R.id.pb_loading_indicator);
@@ -76,7 +150,7 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Movi
             //resetting pageId to 1
             pageId = 1;
             //Initialize Loader
-            movieLoaderManager.initLoader(MOVIE_LOADER_ID, null, this);
+            movieLoaderManager.initLoader(MOVIE_LOADER_ID, null, movieLoader);
         }
         //Initialize View Layout
         initLayout();
@@ -118,70 +192,10 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Movi
             });
             Toast.makeText(getApplicationContext(), getResources().getString(R.string.no_internet_text), Toast.LENGTH_SHORT).show();
         } else {
-            movieLoaderManager.restartLoader(LOAD_MORE_MOVIE_ID, null, this);
+            movieLoaderManager.restartLoader(LOAD_MORE_MOVIE_ID, null, movieLoader);
         }
     }
 
-    @Override
-    public Loader<List<Movies>> onCreateLoader(int i, Bundle bundle) {
-        SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(this);
-        String sortOrder = sharedPrefs.getString(
-                getString(R.string.settings_order_by_key),
-                getString(R.string.settings_order_by_default));
-
-        Log.v(MainActivity.class.getName(), "3" + sortOrder);
-        Uri baseUri = Uri.parse(MOVIE_DB_REQUEST_URL);
-        Uri.Builder uriBuilder = baseUri.buildUpon();
-        if (sortOrder.equals("popularity")) {
-            uriBuilder.appendPath("movie");
-            uriBuilder.appendPath("popular");
-        } else if (sortOrder.equals("topRated")) {
-            uriBuilder.appendPath("movie");
-            uriBuilder.appendPath("top_rated");
-        }
-        uriBuilder.appendQueryParameter("api_key", MovieContract.getApiKey());
-        uriBuilder.appendQueryParameter("page", String.valueOf(pageId));
-        Log.v(MainActivity.class.getName(), uriBuilder.toString());
-        mLoadingIndicator = (ProgressBar) findViewById(R.id.pb_loading_indicator);
-        mLoadingIndicator.setVisibility(View.VISIBLE);
-        return new MoviesAsyncTaskLoader(this, uriBuilder.toString());
-    }
-
-    @Override
-    public void onLoadFinished(Loader<List<Movies>> loader, List<Movies> movies) {
-
-        mLoadingIndicator.setVisibility(View.INVISIBLE);
-        if (movieList == null)
-            movieList = new ArrayList<>();
-        if (movies != null) {
-            checkConnectivityButton.setVisibility(View.INVISIBLE);
-            mEmptyStateTextView.setText(null);
-            intersectList(movies, movieList);
-        } else if(movieList==null){
-            mEmptyStateTextView.setText(R.string.no_result_text);
-        }
-        switch (loader.getId()) {
-            case MOVIE_LOADER_ID:
-                mAdapter.setMovieData(movies);
-                if (null == movies) {
-                    Log.v(LOG_TAG, "No movies");
-                } else {
-                    showMovieDataView();
-                }
-                break;
-            case LOAD_MORE_MOVIE_ID:
-                if (null != movies) {
-                    mAdapter.setMovieData(movieList);
-                    mAdapter.notifyDataChanged();
-                }
-                break;
-        }
-    }
-
-    @Override
-    public void onLoaderReset(Loader<List<Movies>> loader) {
-
-    }
 
     private void showMovieDataView() {
         mRecyclerView.setVisibility(View.VISIBLE);
@@ -248,4 +262,6 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Movi
     public static void setPageId(int pageId) {
         MainActivity.pageId = pageId;
     }
+
+
 }

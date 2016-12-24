@@ -21,12 +21,12 @@ public class MoviesDbHelper extends SQLiteOpenHelper {
     @Override
     public void onCreate(SQLiteDatabase sqLiteDatabase) {
         final String SQL_CREATE_FAVORITES_TABLE="Create Table "+ FavoritesEntry.TABLE_NAME +" ("+
-                FavoritesEntry._ID +" INTEGER PRIMARY KEY AUTOINCREMENT "+
-                FavoritesEntry.COLUMN_MOVIE_ID+" INTEGER NOT NULL"+
-                FavoritesEntry.COLUMN_MOVIE_NAME+" TEXT NOT NULL "+
-                FavoritesEntry.COLUMN_MOVIE_RATING+" TEXT DEFAULT 0 "+
-                FavoritesEntry.COLUMN_MOVIE_RELEASE_DATE+" TEXT "+
-                FavoritesEntry.COLUMN_MOVIE_POSTER+" BLOB "+
+                FavoritesEntry._ID +" INTEGER PRIMARY KEY AUTOINCREMENT, "+
+                FavoritesEntry.COLUMN_MOVIE_ID+" INTEGER NOT NULL,"+
+                FavoritesEntry.COLUMN_MOVIE_NAME+" TEXT NOT NULL, "+
+                FavoritesEntry.COLUMN_MOVIE_RATING+" TEXT DEFAULT 0, "+
+                FavoritesEntry.COLUMN_MOVIE_RELEASE_DATE+" TEXT, "+
+                FavoritesEntry.COLUMN_MOVIE_POSTER+" BLOB, "+
                 FavoritesEntry.COLUMN_IS_FAVORITE+" INTEGER DEFAULT 0"+
                 ")";
         sqLiteDatabase.execSQL(SQL_CREATE_FAVORITES_TABLE);

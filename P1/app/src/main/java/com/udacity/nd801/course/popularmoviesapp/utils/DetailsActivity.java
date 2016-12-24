@@ -1,9 +1,12 @@
 package com.udacity.nd801.course.popularmoviesapp.utils;
 
 import android.app.LoaderManager;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.Loader;
+import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
@@ -22,8 +25,10 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.squareup.picasso.Picasso;
+import com.udacity.nd801.course.popularmoviesapp.DatabaseUtils.FavoritesReaderContract;
 import com.udacity.nd801.course.popularmoviesapp.R;
 
+import java.io.ByteArrayOutputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -218,5 +223,23 @@ public class DetailsActivity extends AppCompatActivity implements LoaderManager.
 
     private void addMovieToFavoritesDb(){
         Log.v(LOG_TAG,"addMovieToFavoritesDb :"+mMovieData.toString());
+        ContentValues contentValues=new ContentValues();
+        contentValues.put(FavoritesReaderContract.FavoritesEntry.COLUMN_MOVIE_ID,Integer.parseInt(mMovieData.getMovieId()));
+        contentValues.put(FavoritesReaderContract.FavoritesEntry.COLUMN_MOVIE_NAME,mMovieData.getOriginalTitle());
+        contentValues.put(FavoritesReaderContract.FavoritesEntry.COLUMN_MOVIE_RATING,mMovieData.getUserRating());
+        contentValues.put(FavoritesReaderContract.FavoritesEntry.COLUMN_MOVIE_RELEASE_DATE,mMovieData.getReleaseDate());
+
+        //Converting image in imageView to byte[]
+        Bitmap bitmap = ((BitmapDrawable)movie_image_view.getDrawable()).getBitmap();
+        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        bitmap .compress(Bitmap.CompressFormat.PNG, 100, bos);
+
+        contentValues.put(FavoritesReaderContract.FavoritesEntry.COLUMN_MOVIE_POSTER,bos.toByteArray());
+        contentValues.put(FavoritesReaderContract.FavoritesEntry.COLUMN_IS_FAVORITE,0);
+        Uri uri=getContentResolver().insert(FavoritesReaderContract.FavoritesEntry.CONTENT_URI,contentValues);
+        if(uri!=null){
+            Toast.makeText(getBaseContext(), /*getResources().getString(R.string.movie_inserted_placeholder) +"\t"+ */uri.toString(), Toast.LENGTH_LONG).show();
+            movie_favorites_button.setText(getResources().getString(R.string.remove_favorites));
+        }
     }
 }

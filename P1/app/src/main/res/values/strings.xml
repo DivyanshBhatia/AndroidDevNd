@@ -36,5 +36,7 @@
     <string name="review_read_more">Read More..</string>
     <string name="movie_review_section_label">Reviews</string>
     <string name="add_favorites">Add to Favorites</string>
+    <string name="movie_inserted_placeholder">Success! Movie inserted in Database.</string>
+    <string name="remove_favorites">Remove from Favorites</string>
 
 </resources>
