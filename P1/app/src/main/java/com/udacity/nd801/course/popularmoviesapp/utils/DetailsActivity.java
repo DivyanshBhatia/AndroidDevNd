@@ -16,6 +16,7 @@ import android.util.Log;
 import android.util.TypedValue;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -43,6 +44,7 @@ public class DetailsActivity extends AppCompatActivity implements LoaderManager.
     private TextView movie_release_date;
     private TextView movie_vote_rating;
     private TextView movie_plot_synopsis;
+    private Button movie_favorites_button;
     private Movies mMovieData;
     private MovieDetails movieDetails;
     private RecyclerView mTrailerRecyclerView;
@@ -103,6 +105,7 @@ public class DetailsActivity extends AppCompatActivity implements LoaderManager.
         movie_release_date=(TextView)findViewById(R.id.release_date_value);
         movie_plot_synopsis=(TextView)findViewById(R.id.detail_synopsis_value);
         movie_vote_rating=(TextView)findViewById(R.id.vote_rating_value);
+        movie_favorites_button = (Button) findViewById(R.id.add_to_favorites_id);
 
         if(posterPath!=null){
             Uri uri=Uri.parse(MovieContract.getBaseImageUrl());
@@ -132,6 +135,12 @@ public class DetailsActivity extends AppCompatActivity implements LoaderManager.
         movie_plot_synopsis.setText(mMovieData.getPlotSynopsis());
         movie_release_date.setText(mMovieData.getReleaseDate());
         movie_vote_rating.setText(mMovieData.getUserRating().toString());
+        movie_favorites_button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                addMovieToFavoritesDb();
+            }
+        });
     }
 
     private String generateTrailerDataUrls(Uri baseUri) {
@@ -205,5 +214,9 @@ public class DetailsActivity extends AppCompatActivity implements LoaderManager.
         NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
         boolean isConnected = activeNetwork != null && activeNetwork.isConnectedOrConnecting();
         return isConnected;
+    }
+
+    private void addMovieToFavoritesDb(){
+        Log.v(LOG_TAG,"addMovieToFavoritesDb :"+mMovieData.toString());
     }
 }

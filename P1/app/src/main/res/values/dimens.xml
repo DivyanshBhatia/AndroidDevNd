@@ -11,4 +11,8 @@
     <dimen name="medium_size_text">24sp</dimen>
     <dimen name="regular_device_text_size">16sp</dimen>
     <dimen name="padding_24_dp">24dp</dimen>
+    <dimen name="dimen_120_dp">120dp</dimen>
+    <dimen name="dimen_60_dp">72dp</dimen>
+    <dimen name="padding_4_dp">4dp</dimen>
+    <dimen name="dimen_90_dp">90dp</dimen>
 </resources>

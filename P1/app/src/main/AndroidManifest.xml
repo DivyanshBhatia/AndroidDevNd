@@ -30,6 +30,11 @@
             android:label="@string/movie_details_activity"
             >
         </activity>
+        <provider
+            android:authorities="com.udacity.nd801.course.popularmoviesapp"
+            android:name="com.udacity.nd801.course.popularmoviesapp.DatabaseUtils.MovieContentProvider"
+            android:exported="false">
+        </provider>
     </application>
 
 </manifest>

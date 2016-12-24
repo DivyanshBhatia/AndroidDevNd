@@ -20,13 +20,19 @@ public class MovieContract {
     private static final String MOVIE_OBJECT_RESULTS = "results";
 
     //Trailer Section
-    private static final String MOVIE_TRAILER_KEY="key";
-    private static final String MOVIE_TRAILER_TYPE_KEY="type";
-    private static final String MOVIE_TRAILER_TYPE_VALUE="Trailer";
-    private static final String MOVIE_TRAILER_SITE_KEY="site";
-    private static final String MOVIE_TRAILER_SITE_VALUE="YouTube";
-    private static final String MOVIE_TRAILER_NAME_KEY="name";
-    private static final String MOVIE_YOUTUBE_URL="https://www.youtube.com/watch";
+    private static final String MOVIE_TRAILER_KEY = "key";
+    private static final String MOVIE_TRAILER_TYPE_KEY = "type";
+    private static final String MOVIE_TRAILER_TYPE_VALUE = "Trailer";
+    private static final String MOVIE_TRAILER_SITE_KEY = "site";
+    private static final String MOVIE_TRAILER_SITE_VALUE = "YouTube";
+    private static final String MOVIE_TRAILER_NAME_KEY = "name";
+    private static final String MOVIE_YOUTUBE_URL = "https://www.youtube.com/watch";
+
+    //Review Section
+    private static final String MOVIE_REVIEW_AUTHOR_KEY = "author";
+    private static final String MOVIE_REVIEW_CONTENT_KEY = "content";
+    private static final String MOVIE_REVIEW_URL_KEY = "url";
+
 
     public static String getBaseImageUrl() {
         return BASE_IMAGE_URL;
@@ -60,7 +66,9 @@ public class MovieContract {
         return MOVIE_ID;
     }
 
-    public static String getBaseMovieUrl() { return BASE_MOVIE_URL;    }
+    public static String getBaseMovieUrl() {
+        return BASE_MOVIE_URL;
+    }
 
     public static String getApiKey() {
         return API_KEY;
@@ -100,5 +108,17 @@ public class MovieContract {
 
     public static String getMovieYoutubeUrl() {
         return MOVIE_YOUTUBE_URL;
+    }
+
+    public static String getMovieReviewAuthorKey() {
+        return MOVIE_REVIEW_AUTHOR_KEY;
+    }
+
+    public static String getMovieReviewContentKey() {
+        return MOVIE_REVIEW_CONTENT_KEY;
+    }
+
+    public static String getMovieReviewUrlKey() {
+        return MOVIE_REVIEW_URL_KEY;
     }
 }
