@@ -9,6 +9,7 @@ import android.database.Cursor;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
 import com.udacity.nd801.course.popularmoviesapp.utils.MovieContract;
@@ -40,13 +41,19 @@ public class MovieContentProvider extends ContentProvider {
 
     @Nullable
     @Override
-    public Cursor query(Uri uri, String[] strings, String s, String[] strings1, String s1) {
+    public Cursor query(@NonNull Uri uri, String[] strings, String s, String[] strings1, String s1) {
         final SQLiteDatabase moviesDb=mMovieDbHelper.getReadableDatabase();
         int match=sUriMatcher.match(uri);
         Cursor cursor=null;
         switch(match){
             case MOVIE_TASKS:
                 cursor=moviesDb.query(FavoritesReaderContract.FavoritesEntry.TABLE_NAME,strings,s,strings1,null,null,s1);
+                break;
+            case MOVIE_TASKS_WITH_ID:
+                String id=uri.getPathSegments().get(1);
+                String mSelection=FavoritesReaderContract.FavoritesEntry.COLUMN_MOVIE_ID+"=?";
+                String[] mSelectionArgs=new String[]{id};
+                cursor=moviesDb.query(FavoritesReaderContract.FavoritesEntry.TABLE_NAME,strings,mSelection,mSelectionArgs,null,null,s1);
                 break;
             default:
                 throw new UnsupportedOperationException("Uri not found:"+uri);
@@ -63,7 +70,7 @@ public class MovieContentProvider extends ContentProvider {
 
     @Nullable
     @Override
-    public Uri insert(Uri uri, ContentValues contentValues) {
+    public Uri insert(@NonNull Uri uri, ContentValues contentValues) {
         final SQLiteDatabase moviesDb=mMovieDbHelper.getWritableDatabase();
         int match=sUriMatcher.match(uri);
         Uri returnUri=null;
@@ -76,10 +83,6 @@ public class MovieContentProvider extends ContentProvider {
                     throw new android.database.SQLException("Unable to insert row with "+uri);
                 }
                 break;
-
-            case MOVIE_TASKS_WITH_ID:
-                break;
-
             default:
                 throw new UnsupportedOperationException("Uri not found:"+uri);
         }
@@ -88,12 +91,30 @@ public class MovieContentProvider extends ContentProvider {
     }
 
     @Override
-    public int delete(Uri uri, String s, String[] strings) {
+    public int delete(@NonNull Uri uri, String s, String[] strings) {
         return 0;
     }
 
     @Override
-    public int update(Uri uri, ContentValues contentValues, String s, String[] strings) {
-        return 0;
+    public int update(@NonNull Uri uri, ContentValues contentValues, String s, String[] strings) {
+        final SQLiteDatabase moviesDb=mMovieDbHelper.getWritableDatabase();
+        int match=sUriMatcher.match(uri);
+        int moviesUpdated=0;
+        switch(match){
+            case MOVIE_TASKS_WITH_ID:
+                String id = uri.getPathSegments().get(1);
+                String mSelection=FavoritesReaderContract.FavoritesEntry.COLUMN_MOVIE_ID+"=?";
+                String[] mSelectionArgs=new String[]{id};
+                moviesUpdated=moviesDb.update(FavoritesReaderContract.FavoritesEntry.TABLE_NAME,contentValues,mSelection,mSelectionArgs);
+                break;
+            default:
+                throw new UnsupportedOperationException("Uri not found:"+uri);
+        }
+        if (moviesUpdated != 0) {
+            //set notifications if a task was updated
+            getContext().getContentResolver().notifyChange(uri, null);
+        }
+        return moviesUpdated;
+
     }
 }

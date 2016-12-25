@@ -27,7 +27,8 @@ public class MoviesDbHelper extends SQLiteOpenHelper {
                 FavoritesEntry.COLUMN_MOVIE_RATING+" TEXT DEFAULT 0, "+
                 FavoritesEntry.COLUMN_MOVIE_RELEASE_DATE+" TEXT, "+
                 FavoritesEntry.COLUMN_MOVIE_POSTER+" BLOB, "+
-                FavoritesEntry.COLUMN_IS_FAVORITE+" INTEGER DEFAULT 0"+
+                FavoritesEntry.COLUMN_IS_FAVORITE+" INTEGER DEFAULT 0,"+
+                FavoritesEntry.COLUMN_MOVIE_PLOT+" TEXT"+
                 ")";
         sqLiteDatabase.execSQL(SQL_CREATE_FAVORITES_TABLE);
     }

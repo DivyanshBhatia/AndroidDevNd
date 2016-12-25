@@ -23,7 +23,7 @@ import java.util.List;
  * MovieAdapter is used to support viewHolder pattern and optimizing app performance
  */
 
-public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieViewHolder> {
+public class MovieAdapter extends RecyclerView.Adapter<MovieViewHolder> {
 
     private static final String TAG = MovieAdapter.class.getSimpleName();
     private final MovieAdapterOnClickHandler mClickHandler;
@@ -37,14 +37,14 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieViewHol
     }
 
     @Override
-    public MovieAdapter.MovieViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+    public MovieViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         Context context = parent.getContext();
         int layoutIdForListItem = R.layout.movie_list_item;
         LayoutInflater inflater = LayoutInflater.from(context);
         boolean shouldAttachToParentImmediately = false;
 
         View view = inflater.inflate(layoutIdForListItem, parent, shouldAttachToParentImmediately);
-        MovieViewHolder viewHolder = new MovieViewHolder(view);
+        MovieViewHolder viewHolder = new MovieViewHolder(view,mClickHandler);
         return viewHolder;
     }
 
@@ -97,31 +97,5 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieViewHol
 
     public interface OnLoadMoreListener {
         void onLoadMore();
-    }
-
-    class MovieViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
-
-        // Will display the position in the list, ie 0 through getItemCount() - 1
-        public final ImageView mMoviePosterImageView;
-
-        /**
-         * Constructor for our ViewHolder. Within this constructor, we get a reference to our
-         * TextViews and set an onClickListener to listen for clicks. Those will be handled in the
-         * onClick method below.
-         *
-         * @param itemView The View that you inflated in
-         *                 {@link MovieAdapter#onCreateViewHolder(ViewGroup, int)}
-         */
-        public MovieViewHolder(View itemView) {
-            super(itemView);
-            mMoviePosterImageView = (ImageView) itemView.findViewById(R.id.id_movie_poster);
-            itemView.setOnClickListener(this);
-        }
-
-        @Override
-        public void onClick(View v) {
-            int adapterPosition = getAdapterPosition();
-            mClickHandler.onClick(String.valueOf(adapterPosition));
-        }
     }
 }

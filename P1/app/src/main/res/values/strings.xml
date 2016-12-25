@@ -14,6 +14,9 @@
     <!-- Label for order-by most recent option [CHAR LIMIT=20] -->
     <string name="settings_order_by_top_rated_label">Highest Rated</string>
     <string name="settings_order_by_top_rated_value" translatable="false">topRated</string>
+
+    <string name="settings_order_by_favorites_label">My Favorites</string>
+
     <string name="settings_menu_item">settings</string>
     <string name="settings_title">Settings</string>
     <string name="movie_poster_content">This resource is for Movie Posters</string>
@@ -38,5 +41,8 @@
     <string name="add_favorites">Add to Favorites</string>
     <string name="movie_inserted_placeholder">Success! Movie inserted in Database.</string>
     <string name="remove_favorites">Remove from Favorites</string>
+    <string name="settings_order_by_favorites_values">favorites</string>
+    <string name="no_favorites_text">Hi, it seems you don\'t have any favorite movies currently. Add some favorite movies as these can be fetched any time even without internet         connection.</string>
+    <string name="movie_removed_placeholder">Selected movie is no more a favorite</string>
 
 </resources>

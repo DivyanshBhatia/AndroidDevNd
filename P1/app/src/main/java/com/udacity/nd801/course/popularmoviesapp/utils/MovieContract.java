@@ -17,6 +17,8 @@ public class MovieContract {
     private static final String MOVIE_USER_RATING = "vote_average";
     private static final String MOVIE_ID = "id";
     private static final String MOVIE_OBJECT_STRING = "movieObjectString";
+    private static final String MOVIE_SORT_ORDER_OBJECT_STRING="sortOrder";
+    private static final String MOVIE_ID_OBJECT_STRING="movieId";
     private static final String MOVIE_OBJECT_RESULTS = "results";
 
     //Trailer Section
@@ -120,5 +122,13 @@ public class MovieContract {
 
     public static String getMovieReviewUrlKey() {
         return MOVIE_REVIEW_URL_KEY;
+    }
+
+    public static String getMovieSortOrderObjectString() {
+        return MOVIE_SORT_ORDER_OBJECT_STRING;
+    }
+
+    public static String getMovieIdObjectString() {
+        return MOVIE_ID_OBJECT_STRING;
     }
 }

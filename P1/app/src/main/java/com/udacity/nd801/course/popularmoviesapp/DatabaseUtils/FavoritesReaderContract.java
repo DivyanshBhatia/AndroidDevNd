@@ -13,6 +13,7 @@ public class FavoritesReaderContract {
     public static final String AUTHORITY="com.udacity.nd801.course.popularmoviesapp"; //Authority as declared in Manifest file
     public static final Uri BASE_CONTENT_URI = Uri.parse("content://"+AUTHORITY);
     public static final String PATH_TASKS = "tasks";
+    public static final String ITEM_DATA = "#";
 
     private FavoritesReaderContract(){}
 
@@ -20,6 +21,9 @@ public class FavoritesReaderContract {
 
         public static final Uri CONTENT_URI =
                 BASE_CONTENT_URI.buildUpon().appendPath(PATH_TASKS).build();
+        public static final Uri ITEM_QUERY_CONTENT_URI =
+                BASE_CONTENT_URI.buildUpon().appendPath(PATH_TASKS).appendEncodedPath(ITEM_DATA).build();
+
 
         public static final String TABLE_NAME="favorites";
         public static final String COLUMN_MOVIE_ID="movieId";
@@ -28,5 +32,6 @@ public class FavoritesReaderContract {
         public static final String COLUMN_MOVIE_RELEASE_DATE="releaseDate";
         public static final String COLUMN_MOVIE_RATING="rating";
         public static final String COLUMN_IS_FAVORITE="isFavorite";
+        public static final String COLUMN_MOVIE_PLOT="moviePlot";
     }
 }

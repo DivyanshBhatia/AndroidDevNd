@@ -1,10 +1,14 @@
 package com.udacity.nd801.course.popularmoviesapp.utils;
 
-import android.app.LoaderManager;
+
+import android.graphics.BitmapFactory;
+import android.support.v4.app.LoaderManager;
+import android.support.v4.app.LoaderManager.LoaderCallbacks;
+import android.support.v4.content.CursorLoader;
+import android.support.v4.content.Loader;
 import android.content.ContentValues;
 import android.content.Context;
-import android.content.Intent;
-import android.content.Loader;
+import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.net.ConnectivityManager;
@@ -41,15 +45,17 @@ import java.util.List;
  * It displays the details of selected movie
  */
 
-public class DetailsActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<MovieDetails>{
+public class DetailsActivity extends AppCompatActivity {
     private static final String LOG_TAG= DetailsActivity.class.getName();
     private static final int TRAILER_LOADER_ID = 3;
+    private static final int CURSOR_LOADER_ID = 4;
     private ImageView movie_image_view;
     private TextView movie_original_title;
     private TextView movie_release_date;
     private TextView movie_vote_rating;
     private TextView movie_plot_synopsis;
     private Button movie_favorites_button;
+    private String movieId;
     private Movies mMovieData;
     private MovieDetails movieDetails;
     private RecyclerView mTrailerRecyclerView;
@@ -57,24 +63,97 @@ public class DetailsActivity extends AppCompatActivity implements LoaderManager.
     private TrailerAdapter mTrailerAdapter;
     private ReviewAdapter mReviewAdapter;
     private static LoaderManager trailerLoaderManager;
-
+    private LoaderManager.LoaderCallbacks<MovieDetails> mMovieDetailsLoader;
+    private LoaderManager.LoaderCallbacks<Cursor> mCursorLoader;
+    private Cursor mCursor;
+    private Context context;
+    private String sortOrder;
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_details);
-
+        context=getApplicationContext();
         ActionBar actionBar=this.getSupportActionBar();
         if(actionBar!=null){
             actionBar.setDisplayHomeAsUpEnabled(true);
         }
+
         Bundle b = this.getIntent().getExtras();
         if (b != null) {
-            mMovieData = b.getParcelable(MovieContract.getMovieObjectString());
-            Log.v(LOG_TAG,mMovieData.toString());
+            sortOrder=b.getString(MovieContract.getMovieSortOrderObjectString());
+            if(sortOrder.equals("popularity")||sortOrder.equals("topRated")) {
+                mMovieData = b.getParcelable(MovieContract.getMovieObjectString());
+                movieId=mMovieData.getMovieId();
+                Log.v(LOG_TAG,mMovieData.toString());
+            } else if(sortOrder.equals("favorites")){
+                movieId=String.valueOf(b.getInt(MovieContract.getMovieIdObjectString()));
+                Log.v(LOG_TAG,movieId);
+            }
         }
-        initLayout();
+        mCursorLoader = new LoaderManager.LoaderCallbacks<Cursor>(){
+
+            @Override
+            public Loader<Cursor> onCreateLoader(int i, Bundle bundle) {
+                return new CursorLoader(context,
+                        FavoritesReaderContract.FavoritesEntry.CONTENT_URI.buildUpon().appendPath(movieId).build(),
+                        null,
+                        null,
+                        null,
+                        FavoritesReaderContract.FavoritesEntry._ID);
+            }
+
+            @Override
+            public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {
+                mCursor=cursor;
+                mCursor.moveToFirst();
+                initLayout(sortOrder);
+
+            }
+
+            @Override
+            public void onLoaderReset(Loader<Cursor> loader) {
+
+            }
+        };
+        getSupportLoaderManager().initLoader(CURSOR_LOADER_ID,null, mCursorLoader);
+        mTrailerAdapter = new TrailerAdapter();
+        mReviewAdapter=new ReviewAdapter();
         if(checkConnectivity()) {
-            trailerLoaderManager = getLoaderManager();
-            trailerLoaderManager.initLoader(TRAILER_LOADER_ID, null, this);
+
+            mMovieDetailsLoader= new LoaderManager.LoaderCallbacks<MovieDetails>() {
+                @Override
+                public Loader<MovieDetails> onCreateLoader(int i, Bundle bundle) {
+                    Uri baseUri = Uri.parse(MovieContract.getBaseMovieUrl());
+                    String trailerUrl=generateTrailerDataUrls(baseUri,movieId);
+                    String reviewsUrl=generateReviewsDataUrls(baseUri,movieId);
+                    return new MovieDetailsAsyncTaskLoader(context, trailerUrl, reviewsUrl);
+                }
+
+                @Override
+                public void onLoadFinished(Loader<MovieDetails> loader, MovieDetails movieDetailsData) {
+                    mTrailerAdapter.setTrailerData(movieDetailsData.getmTrailers());
+                    mReviewAdapter.setReviewData(movieDetailsData.getmReviews());
+                    movieDetails=movieDetailsData;
+                    TextView video_section_label_view=((TextView) findViewById(R.id.movie_video_section_label));
+                    TextView review_section_label_view=((TextView) findViewById(R.id.movie_review_section_label));
+                    if(movieDetails.getmTrailers().size()==0) {
+                        video_section_label_view.setVisibility(View.GONE);
+                    } else{
+                        video_section_label_view.setVisibility(View.VISIBLE);
+                    }
+
+                    if(movieDetails.getmReviews().size()==0) {
+                        review_section_label_view.setVisibility(View.GONE);
+                    } else{
+                        review_section_label_view.setVisibility(View.VISIBLE);
+                    }
+                }
+
+                @Override
+                public void onLoaderReset(Loader<MovieDetails> loader) {
+
+                }
+            };
+            getSupportLoaderManager().initLoader(TRAILER_LOADER_ID, null, mMovieDetailsLoader);
         } else{
             Toast.makeText(getApplicationContext(),getResources().getString(R.string.no_internet_text),Toast.LENGTH_SHORT).show();
         }
@@ -83,14 +162,21 @@ public class DetailsActivity extends AppCompatActivity implements LoaderManager.
     /*
     The initLayout method is used to initialize Layouts
      */
-    private void initLayout(){
-        String posterPath=mMovieData.getMoviePosterUrl();
+    private void initLayout(String sortOrder){
+
+        //Local variables to initLayout
+        String originalTitle=null;
+        String plotSynopsis=null;
+        String userRating=null;
+        String releaseDate=null;
+        int isFavorite=0;
+
         //Trailer Recycle view initialize
         mTrailerRecyclerView = (RecyclerView) findViewById(R.id.recyclerview_trailers);
         mTrailerRecyclerView.setHasFixedSize(true);
         LinearLayoutManager trailerLayoutManager
                 = new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false);
-        mTrailerAdapter = new TrailerAdapter();
+
 
         mTrailerRecyclerView.setLayoutManager(trailerLayoutManager);
         mTrailerRecyclerView.setAdapter(mTrailerAdapter);
@@ -101,7 +187,7 @@ public class DetailsActivity extends AppCompatActivity implements LoaderManager.
         LinearLayoutManager reviewLayoutManager
                 = new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false);
         mReviewRecyclerView.setLayoutManager(reviewLayoutManager);
-        mReviewAdapter=new ReviewAdapter();
+
         mReviewRecyclerView.setAdapter(mReviewAdapter);
 
         //Initialize Detail Layout
@@ -112,45 +198,80 @@ public class DetailsActivity extends AppCompatActivity implements LoaderManager.
         movie_vote_rating=(TextView)findViewById(R.id.vote_rating_value);
         movie_favorites_button = (Button) findViewById(R.id.add_to_favorites_id);
 
-        if(posterPath!=null){
-            Uri uri=Uri.parse(MovieContract.getBaseImageUrl());
-            Uri.Builder uriBuilder = uri.buildUpon();
-            uriBuilder.appendPath(MovieContract.getBaseImageSettings());
-            uriBuilder.appendPath(posterPath);
+        if(sortOrder.equals("popularity")||sortOrder.equals("topRated")) {
+            originalTitle=mMovieData.getOriginalTitle();
+            plotSynopsis=mMovieData.getPlotSynopsis();
+            releaseDate=mMovieData.getReleaseDate();
+            userRating=mMovieData.getUserRating().toString();
 
-            Context context=movie_image_view.getContext();
-            try {
-                URL url = new URL(URLDecoder.decode(uriBuilder.build().toString(), "UTF-8"));
-                Picasso.with(context).load(url.toString()).into(movie_image_view);
-            } catch (MalformedURLException e) {
-                Log.d(LOG_TAG, e.getMessage());
-            } catch (UnsupportedEncodingException e) {
-                Log.d(LOG_TAG,e.getMessage());
+            //Making Picasso Call to Fetch from Network
+            String posterPath=mMovieData.getMoviePosterUrl();
+            if(posterPath!=null){
+                Uri uri=Uri.parse(MovieContract.getBaseImageUrl());
+                Uri.Builder uriBuilder = uri.buildUpon();
+                uriBuilder.appendPath(MovieContract.getBaseImageSettings());
+                uriBuilder.appendPath(posterPath);
+
+                Context context=movie_image_view.getContext();
+                try {
+                    URL url = new URL(URLDecoder.decode(uriBuilder.build().toString(), "UTF-8"));
+                    Picasso.with(context).load(url.toString()).into(movie_image_view);
+                } catch (MalformedURLException e) {
+                    Log.d(LOG_TAG, e.getMessage());
+                } catch (UnsupportedEncodingException e) {
+                    Log.d(LOG_TAG,e.getMessage());
+                }
+            }
+
+        }
+        if(mCursor!=null && mCursor.moveToFirst()){
+            originalTitle=mCursor.getString(mCursor.getColumnIndex(FavoritesReaderContract.FavoritesEntry.COLUMN_MOVIE_NAME));
+            plotSynopsis=mCursor.getString(mCursor.getColumnIndex(FavoritesReaderContract.FavoritesEntry.COLUMN_MOVIE_PLOT));
+            userRating=mCursor.getString(mCursor.getColumnIndex(FavoritesReaderContract.FavoritesEntry.COLUMN_MOVIE_RATING));
+            releaseDate=mCursor.getString(mCursor.getColumnIndex(FavoritesReaderContract.FavoritesEntry.COLUMN_MOVIE_RELEASE_DATE));
+            byte[] imageArr=mCursor.getBlob(mCursor.getColumnIndex(FavoritesReaderContract.FavoritesEntry.COLUMN_MOVIE_POSTER));
+            Bitmap bitmap = BitmapFactory.decodeByteArray(imageArr , 0, imageArr.length);
+            movie_image_view.setImageBitmap(bitmap);
+            isFavorite = mCursor.getInt(mCursor.getColumnIndex(FavoritesReaderContract.FavoritesEntry.COLUMN_IS_FAVORITE));
+        }
+
+            if(isFavorite==0){
+                movie_favorites_button.setText(getResources().getString(R.string.add_favorites));
+            } else{
+                movie_favorites_button.setText(getResources().getString(R.string.remove_favorites));
+            }
+
+        if(originalTitle!=null) {
+            String[] movieTitleWords = originalTitle.split(" ");
+            if (movieTitleWords.length > 6) {
+                movie_original_title.setTextSize(TypedValue.COMPLEX_UNIT_PX, getResources().getDimension(R.dimen.medium_size_text));
+            } else if (movieTitleWords.length > 3) {
+                movie_original_title.setTextSize(TypedValue.COMPLEX_UNIT_PX, getResources().getDimension(R.dimen.heading_long_text_size));
+            } else {
+                movie_original_title.setTextSize(TypedValue.COMPLEX_UNIT_PX, getResources().getDimension(R.dimen.heading_text_size));
             }
         }
-        String[] movieTitleWords=mMovieData.getOriginalTitle().split(" ");
-        if(movieTitleWords.length>6){
-            movie_original_title.setTextSize(TypedValue.COMPLEX_UNIT_PX,getResources().getDimension(R.dimen.medium_size_text));
-        } else if(movieTitleWords.length>3){
-            movie_original_title.setTextSize(TypedValue.COMPLEX_UNIT_PX,getResources().getDimension(R.dimen.heading_long_text_size));
-        } else{
-            movie_original_title.setTextSize(TypedValue.COMPLEX_UNIT_PX,getResources().getDimension(R.dimen.heading_text_size));
-        }
-        movie_original_title.setText(mMovieData.getOriginalTitle());
-        movie_plot_synopsis.setText(mMovieData.getPlotSynopsis());
-        movie_release_date.setText(mMovieData.getReleaseDate());
-        movie_vote_rating.setText(mMovieData.getUserRating().toString());
+        movie_original_title.setText(originalTitle);
+        movie_plot_synopsis.setText(plotSynopsis);
+        movie_release_date.setText(releaseDate);
+        movie_vote_rating.setText(userRating);
         movie_favorites_button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                addMovieToFavoritesDb();
+                getSupportLoaderManager().initLoader(CURSOR_LOADER_ID,null, mCursorLoader);
+                if(mCursor==null || (mCursor!=null &&!mCursor.moveToFirst())) {
+                    addMovieToFavoritesDb();
+                } else if(mCursor.getInt(mCursor.getColumnIndex(FavoritesReaderContract.FavoritesEntry.COLUMN_IS_FAVORITE))==1){
+                    updateMovieInFavoritesDb(0);
+                } else if(mCursor.getInt(mCursor.getColumnIndex(FavoritesReaderContract.FavoritesEntry.COLUMN_IS_FAVORITE))==0){
+                    updateMovieInFavoritesDb(1);
+                }
             }
         });
     }
 
-    private String generateTrailerDataUrls(Uri baseUri) {
+    private String generateTrailerDataUrls(Uri baseUri,String movieId ) {
         String trailerUrl = null;
-        String movieId = mMovieData.getMovieId();
         baseUri = Uri.parse(MovieContract.getBaseMovieUrl());
         Uri.Builder trailerUriBuilder = baseUri.buildUpon();
         trailerUriBuilder.appendPath(movieId);
@@ -159,9 +280,8 @@ public class DetailsActivity extends AppCompatActivity implements LoaderManager.
         trailerUrl = trailerUriBuilder.toString();
         return trailerUrl;
     }
-    private String generateReviewsDataUrls(Uri baseUri) {
+    private String generateReviewsDataUrls(Uri baseUri,String movieId) {
         String reviewsUrl = null;
-        String movieId = mMovieData.getMovieId();
         Uri.Builder reviewsUriBuilder = baseUri.buildUpon();
         reviewsUriBuilder.appendPath(movieId);
         reviewsUriBuilder.appendPath("reviews");
@@ -180,39 +300,6 @@ public class DetailsActivity extends AppCompatActivity implements LoaderManager.
         return super.onOptionsItemSelected(item);
     }
 
-    @Override
-    public Loader<MovieDetails> onCreateLoader(int i, Bundle bundle) {
-        Uri baseUri = Uri.parse(MovieContract.getBaseMovieUrl());
-        String trailerUrl=generateTrailerDataUrls(baseUri);
-        String reviewsUrl=generateReviewsDataUrls(baseUri);
-
-        return new MovieDetailsAsyncTaskLoader(this, trailerUrl, reviewsUrl);
-    }
-
-    @Override
-    public void onLoadFinished(Loader<MovieDetails> loader, MovieDetails movieDetails) {
-        mTrailerAdapter.setTrailerData(movieDetails.getmTrailers());
-        mReviewAdapter.setReviewData(movieDetails.getmReviews());
-        this.movieDetails=movieDetails;
-        TextView video_section_label_view=((TextView) findViewById(R.id.movie_video_section_label));
-        TextView review_section_label_view=((TextView) findViewById(R.id.movie_review_section_label));
-        if(movieDetails.getmTrailers().size()==0) {
-            video_section_label_view.setVisibility(View.GONE);
-        } else{
-            video_section_label_view.setVisibility(View.VISIBLE);
-        }
-
-        if(movieDetails.getmReviews().size()==0) {
-            review_section_label_view.setVisibility(View.GONE);
-        } else{
-            review_section_label_view.setVisibility(View.VISIBLE);
-        }
-    }
-
-    @Override
-    public void onLoaderReset(Loader<MovieDetails> loader) {
-
-    }
 
     public boolean checkConnectivity(){
         ConnectivityManager cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
@@ -228,6 +315,7 @@ public class DetailsActivity extends AppCompatActivity implements LoaderManager.
         contentValues.put(FavoritesReaderContract.FavoritesEntry.COLUMN_MOVIE_NAME,mMovieData.getOriginalTitle());
         contentValues.put(FavoritesReaderContract.FavoritesEntry.COLUMN_MOVIE_RATING,mMovieData.getUserRating());
         contentValues.put(FavoritesReaderContract.FavoritesEntry.COLUMN_MOVIE_RELEASE_DATE,mMovieData.getReleaseDate());
+        contentValues.put(FavoritesReaderContract.FavoritesEntry.COLUMN_MOVIE_PLOT,mMovieData.getPlotSynopsis());
 
         //Converting image in imageView to byte[]
         Bitmap bitmap = ((BitmapDrawable)movie_image_view.getDrawable()).getBitmap();
@@ -235,11 +323,32 @@ public class DetailsActivity extends AppCompatActivity implements LoaderManager.
         bitmap .compress(Bitmap.CompressFormat.PNG, 100, bos);
 
         contentValues.put(FavoritesReaderContract.FavoritesEntry.COLUMN_MOVIE_POSTER,bos.toByteArray());
-        contentValues.put(FavoritesReaderContract.FavoritesEntry.COLUMN_IS_FAVORITE,0);
+        contentValues.put(FavoritesReaderContract.FavoritesEntry.COLUMN_IS_FAVORITE,1);
         Uri uri=getContentResolver().insert(FavoritesReaderContract.FavoritesEntry.CONTENT_URI,contentValues);
         if(uri!=null){
-            Toast.makeText(getBaseContext(), /*getResources().getString(R.string.movie_inserted_placeholder) +"\t"+ */uri.toString(), Toast.LENGTH_LONG).show();
+            Toast.makeText(getBaseContext(), getResources().getString(R.string.movie_inserted_placeholder), Toast.LENGTH_LONG).show();
             movie_favorites_button.setText(getResources().getString(R.string.remove_favorites));
+        }
+    }
+    private void updateMovieInFavoritesDb(int isFavorite){
+        ContentValues contentValues=new ContentValues();
+        contentValues.put(FavoritesReaderContract.FavoritesEntry.COLUMN_MOVIE_ID,mCursor.getInt(mCursor.getColumnIndex(FavoritesReaderContract.FavoritesEntry.COLUMN_MOVIE_ID)));
+        contentValues.put(FavoritesReaderContract.FavoritesEntry.COLUMN_MOVIE_NAME,mCursor.getString(mCursor.getColumnIndex(FavoritesReaderContract.FavoritesEntry.COLUMN_MOVIE_NAME)));
+        contentValues.put(FavoritesReaderContract.FavoritesEntry.COLUMN_MOVIE_RATING,mCursor.getString(mCursor.getColumnIndex(FavoritesReaderContract.FavoritesEntry.COLUMN_MOVIE_RATING)));
+        contentValues.put(FavoritesReaderContract.FavoritesEntry.COLUMN_MOVIE_RELEASE_DATE,mCursor.getString(mCursor.getColumnIndex(FavoritesReaderContract.FavoritesEntry.COLUMN_MOVIE_RELEASE_DATE)));
+        contentValues.put(FavoritesReaderContract.FavoritesEntry.COLUMN_MOVIE_PLOT,mCursor.getString(mCursor.getColumnIndex(FavoritesReaderContract.FavoritesEntry.COLUMN_MOVIE_PLOT)));
+        contentValues.put(FavoritesReaderContract.FavoritesEntry.COLUMN_MOVIE_POSTER,mCursor.getBlob(mCursor.getColumnIndex(FavoritesReaderContract.FavoritesEntry.COLUMN_MOVIE_POSTER)));
+        contentValues.put(FavoritesReaderContract.FavoritesEntry.COLUMN_IS_FAVORITE,isFavorite);
+        int updatedRows=getContentResolver().update(FavoritesReaderContract.FavoritesEntry.CONTENT_URI.buildUpon().appendPath(String.valueOf(mCursor.getInt(mCursor.getColumnIndex(FavoritesReaderContract.FavoritesEntry.COLUMN_MOVIE_ID)))).build(),contentValues,null,null);
+        if(updatedRows!=0){
+
+            if(isFavorite==0) {
+                Toast.makeText(getBaseContext(), getResources().getString(R.string.movie_removed_placeholder), Toast.LENGTH_LONG).show();
+                movie_favorites_button.setText(getResources().getString(R.string.add_favorites));
+            } else if(isFavorite==1){
+                Toast.makeText(getBaseContext(), getResources().getString(R.string.movie_inserted_placeholder), Toast.LENGTH_LONG).show();
+                movie_favorites_button.setText(getResources().getString(R.string.remove_favorites));
+            }
         }
     }
 }
