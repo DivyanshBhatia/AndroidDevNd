@@ -1,9 +1,10 @@
 package com.udacity.nd801.course.popularmoviesapp;
 
-import android.app.LoaderManager;
 import android.content.Context;
 import android.content.Intent;
-import android.content.Loader;
+import android.support.v4.app.LoaderManager;
+import android.support.v4.content.CursorLoader;
+import android.support.v4.content.Loader;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.net.ConnectivityManager;
@@ -24,13 +25,13 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.udacity.nd801.course.popularmoviesapp.DatabaseUtils.FavoritesReaderContract;
-import com.udacity.nd801.course.popularmoviesapp.utils.CursorAsyncTaskLoader;
 import com.udacity.nd801.course.popularmoviesapp.utils.DetailsActivity;
 import com.udacity.nd801.course.popularmoviesapp.utils.MovieAdapter;
 import com.udacity.nd801.course.popularmoviesapp.utils.MovieContract;
 import com.udacity.nd801.course.popularmoviesapp.utils.MovieCursorAdapter;
 import com.udacity.nd801.course.popularmoviesapp.utils.Movies;
 import com.udacity.nd801.course.popularmoviesapp.utils.MoviesAsyncTaskLoader;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -47,7 +48,7 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Movi
     private static final String LOG_TAG = MainActivity.class.getName();
     private static final int MOVIE_LOADER_ID = 1;
     private static final int LOAD_MORE_MOVIE_ID = 2;
-    private static final int MOVIE_CURSOR_LOADER_ID = 3 ;
+    private static final int MOVIE_CURSOR_LOADER_ID = 3;
     private static LoaderManager movieLoaderManager;
     private static int pageId = 1;
     private static List<Movies> movieList;
@@ -63,19 +64,23 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Movi
     private Cursor mCursor;
     private String sortOrder;
 
+    public static void setPageId(int pageId) {
+        MainActivity.pageId = pageId;
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        context=getApplicationContext();
+        context = getApplicationContext();
         setContentView(R.layout.activity_main);
 
         SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(context);
-       sortOrder = sharedPrefs.getString(
+        sortOrder = sharedPrefs.getString(
                 getString(R.string.settings_order_by_key),
                 getString(R.string.settings_order_by_default));
         Log.v(MainActivity.class.getName(), "3" + sortOrder);
-        if (sortOrder.equals("popularity") || sortOrder.equals("topRated")){
-            mMovieLoader=new LoaderManager.LoaderCallbacks<List<Movies>>(){
+        if (sortOrder.equals("popularity") || sortOrder.equals("topRated")) {
+            mMovieLoader = new LoaderManager.LoaderCallbacks<List<Movies>>() {
 
                 @Override
                 public Loader<List<Movies>> onCreateLoader(int i, Bundle bundle) {
@@ -107,7 +112,7 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Movi
                         checkConnectivityButton.setVisibility(View.INVISIBLE);
                         mEmptyStateTextView.setText(null);
                         intersectList(movies, movieList);
-                    } else if(movieList==null){
+                    } else if (movieList == null) {
                         mEmptyStateTextView.setText(R.string.no_result_text);
                     }
                     switch (loader.getId()) {
@@ -127,27 +132,32 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Movi
                             break;
                     }
                 }
+
                 @Override
                 public void onLoaderReset(Loader<List<Movies>> loader) {
 
                 }
             };
-        } else if(sortOrder.equals("favorites")){
+        } else if (sortOrder.equals("favorites")) {
             mCursorLoader = new LoaderManager.LoaderCallbacks<Cursor>() {
                 @Override
                 public Loader<Cursor> onCreateLoader(int i, Bundle bundle) {
                     mLoadingIndicator = (ProgressBar) findViewById(R.id.pb_loading_indicator);
                     mLoadingIndicator.setVisibility(View.VISIBLE);
-                    return new CursorAsyncTaskLoader(context);
+                    return new CursorLoader(context, FavoritesReaderContract.FavoritesEntry.CONTENT_URI,
+                            null,
+                            FavoritesReaderContract.FavoritesEntry.COLUMN_IS_FAVORITE + "=?",
+                            new String[]{"1"},
+                            FavoritesReaderContract.FavoritesEntry._ID);
                 }
 
                 @Override
                 public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {
                     mLoadingIndicator.setVisibility(View.INVISIBLE);
                     mEmptyStateTextView.setText(null);
-                    mCursor=cursor;
-                    if(cursor==null || (cursor!=null && cursor.getCount()==0)){
-                    mEmptyStateTextView.setText(getResources().getString(R.string.no_favorites_text));
+                    mCursor = cursor;
+                    if (cursor == null || (cursor != null && cursor.getCount() == 0)) {
+                        mEmptyStateTextView.setText(getResources().getString(R.string.no_favorites_text));
                     }
                     mMovieCursorAdapter.swapCursor(cursor);
                 }
@@ -157,16 +167,13 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Movi
                     mMovieCursorAdapter.swapCursor(null);
                 }
             };
-
         }
 
         mLoadingIndicator = (ProgressBar) findViewById(R.id.pb_loading_indicator);
         movieList = new ArrayList<>();
         mEmptyStateTextView = (TextView) findViewById(R.id.empty_text_view);
-        movieLoaderManager = getLoaderManager();
-        checkConnectivityButton = (Button)findViewById(R.id.check_connectivity_button);
-
-
+        movieLoaderManager = getSupportLoaderManager();
+        checkConnectivityButton = (Button) findViewById(R.id.check_connectivity_button);
 
         if (!checkConnectivity()) {
             mLoadingIndicator.setVisibility(View.VISIBLE);
@@ -185,7 +192,7 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Movi
             //This loader is used to make calls from the API
             if (sortOrder.equals("popularity") || sortOrder.equals("topRated")) {
                 movieLoaderManager.initLoader(MOVIE_LOADER_ID, null, mMovieLoader);
-            } else if(sortOrder.equals("favorites")){
+            } else if (sortOrder.equals("favorites")) {
                 movieLoaderManager.initLoader(MOVIE_CURSOR_LOADER_ID, null, mCursorLoader);
             }
         }
@@ -216,8 +223,8 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Movi
                 }
             });
             mRecyclerView.setAdapter(mAdapter);
-        } else if(sortOrder.equals("favorites")){
-            mMovieCursorAdapter=new MovieCursorAdapter(this);
+        } else if (sortOrder.equals("favorites")) {
+            mMovieCursorAdapter = new MovieCursorAdapter(this);
             mRecyclerView.setAdapter(mMovieCursorAdapter);
         }
     }
@@ -237,7 +244,6 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Movi
             movieLoaderManager.restartLoader(LOAD_MORE_MOVIE_ID, null, mMovieLoader);
         }
     }
-
 
     private void showMovieDataView() {
         mRecyclerView.setVisibility(View.VISIBLE);
@@ -261,28 +267,29 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Movi
         return super.onOptionsItemSelected(item);
     }
 
-    private void intersectList(List<Movies> movieList1,List<Movies> movieList2){
-        int tempListSize=movieList2.size();
-        for(Movies movie:movieList1){
-            boolean movieFlag=false;
-            for(Movies movieMain:movieList2){
-                if(movie.getOriginalTitle() .equals(movieMain.getOriginalTitle())){
-                    movieFlag=true;
+    private void intersectList(List<Movies> movieList1, List<Movies> movieList2) {
+        int tempListSize = movieList2.size();
+        for (Movies movie : movieList1) {
+            boolean movieFlag = false;
+            for (Movies movieMain : movieList2) {
+                if (movie.getOriginalTitle().equals(movieMain.getOriginalTitle())) {
+                    movieFlag = true;
                     break;
                 }
             }
-            if(movieFlag==false){
+            if (movieFlag == false) {
                 movieList2.add(movie);
             }
         }
-        if(tempListSize!=movieList2.size()){
-            pageId=pageId+1;
-            Log.v(LOG_TAG,pageId+"."+tempListSize+"."+movieList2.size());
-        } else{
+        if (tempListSize != movieList2.size()) {
+            pageId = pageId + 1;
+            Log.v(LOG_TAG, pageId + "." + tempListSize + "." + movieList2.size());
+        } else {
             Toast.makeText(getApplicationContext(), "Duh! we don't have any more movies for you, please visit back we are getting ready for you!! Happy Cinema", Toast.LENGTH_SHORT).show();
         }
     }
-    public boolean checkConnectivity(){
+
+    public boolean checkConnectivity() {
         ConnectivityManager cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
         boolean isConnected = activeNetwork != null && activeNetwork.isConnectedOrConnecting();
@@ -295,25 +302,19 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Movi
         Context context = this;
         Class destinationClass = DetailsActivity.class;
         Intent intentToStartDetailActivity = new Intent(context, destinationClass);
-        intentToStartDetailActivity.putExtra(MovieContract.getMovieSortOrderObjectString(),sortOrder);
+        intentToStartDetailActivity.putExtra(MovieContract.getMovieSortOrderObjectString(), sortOrder);
         if (sortOrder.equals("popularity") || sortOrder.equals("topRated")) {
             Bundle b = new Bundle();
             b.putParcelable(MovieContract.getMovieObjectString(), movieList.get(Integer.parseInt(position)));
             intentToStartDetailActivity.putExtras(b);
-        } else if (sortOrder.equals("favorites")){
+        } else if (sortOrder.equals("favorites")) {
             int idIndex = mCursor.getColumnIndex(FavoritesReaderContract.FavoritesEntry.COLUMN_MOVIE_ID);
 
             mCursor.moveToPosition(Integer.parseInt(position));
-            int movieId=mCursor.getInt(idIndex);
-            intentToStartDetailActivity.putExtra(MovieContract.getMovieIdObjectString(),movieId);
+            int movieId = mCursor.getInt(idIndex);
+            intentToStartDetailActivity.putExtra(MovieContract.getMovieIdObjectString(), movieId);
         }
 
         startActivity(intentToStartDetailActivity);
     }
-
-    public static void setPageId(int pageId) {
-        MainActivity.pageId = pageId;
-    }
-
-
 }

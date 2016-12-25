@@ -12,10 +12,10 @@ import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
-import com.udacity.nd801.course.popularmoviesapp.utils.MovieContract;
 
 /**
  * Created by dnbhatia on 12/24/2016.
+ * @description: the role of contentprovider is to act as an intermediary layer between db, and contentResolver
  */
 
 public class MovieContentProvider extends ContentProvider {
