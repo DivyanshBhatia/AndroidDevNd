@@ -3,7 +3,6 @@ package com.udacity.nd801.course.popularmoviesapp.utils;
 
 import android.graphics.BitmapFactory;
 import android.support.v4.app.LoaderManager;
-import android.support.v4.app.LoaderManager.LoaderCallbacks;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
 import android.content.ContentValues;
@@ -37,7 +36,6 @@ import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLDecoder;
-import java.util.List;
 
 /**
  * Created by dnbhatia on 12/17/2016.
@@ -62,7 +60,6 @@ public class DetailsActivity extends AppCompatActivity {
     private RecyclerView mReviewRecyclerView;
     private TrailerAdapter mTrailerAdapter;
     private ReviewAdapter mReviewAdapter;
-    private static LoaderManager trailerLoaderManager;
     private LoaderManager.LoaderCallbacks<MovieDetails> mMovieDetailsLoader;
     private LoaderManager.LoaderCallbacks<Cursor> mCursorLoader;
     private Cursor mCursor;
@@ -160,7 +157,7 @@ public class DetailsActivity extends AppCompatActivity {
     }
 
     /*
-    The initLayout method is used to initialize Layouts
+    * The initLayout method is used to initialize Layouts
      */
     private void initLayout(String sortOrder){
 
@@ -270,6 +267,7 @@ public class DetailsActivity extends AppCompatActivity {
         });
     }
 
+    //Generating TrailerData Url
     private String generateTrailerDataUrls(Uri baseUri,String movieId ) {
         String trailerUrl = null;
         baseUri = Uri.parse(MovieContract.getBaseMovieUrl());
@@ -280,6 +278,8 @@ public class DetailsActivity extends AppCompatActivity {
         trailerUrl = trailerUriBuilder.toString();
         return trailerUrl;
     }
+
+    //Generating ReviewData Url
     private String generateReviewsDataUrls(Uri baseUri,String movieId) {
         String reviewsUrl = null;
         Uri.Builder reviewsUriBuilder = baseUri.buildUpon();
@@ -300,7 +300,6 @@ public class DetailsActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
-
     public boolean checkConnectivity(){
         ConnectivityManager cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
@@ -308,6 +307,10 @@ public class DetailsActivity extends AppCompatActivity {
         return isConnected;
     }
 
+    /*
+    *@method:addMovieToFavoritesDb
+    * @description: This method is used to enter favorite records in db
+     */
     private void addMovieToFavoritesDb(){
         Log.v(LOG_TAG,"addMovieToFavoritesDb :"+mMovieData.toString());
         ContentValues contentValues=new ContentValues();
@@ -330,6 +333,10 @@ public class DetailsActivity extends AppCompatActivity {
             movie_favorites_button.setText(getResources().getString(R.string.remove_favorites));
         }
     }
+    /*
+    * @method:updateMovieInFavoritesDb
+    * @description: The Primary task of this method is to updateMovieInFavoritesDb for removing favorite = 0
+     */
     private void updateMovieInFavoritesDb(int isFavorite){
         ContentValues contentValues=new ContentValues();
         contentValues.put(FavoritesReaderContract.FavoritesEntry.COLUMN_MOVIE_ID,mCursor.getInt(mCursor.getColumnIndex(FavoritesReaderContract.FavoritesEntry.COLUMN_MOVIE_ID)));
@@ -341,7 +348,6 @@ public class DetailsActivity extends AppCompatActivity {
         contentValues.put(FavoritesReaderContract.FavoritesEntry.COLUMN_IS_FAVORITE,isFavorite);
         int updatedRows=getContentResolver().update(FavoritesReaderContract.FavoritesEntry.CONTENT_URI.buildUpon().appendPath(String.valueOf(mCursor.getInt(mCursor.getColumnIndex(FavoritesReaderContract.FavoritesEntry.COLUMN_MOVIE_ID)))).build(),contentValues,null,null);
         if(updatedRows!=0){
-
             if(isFavorite==0) {
                 Toast.makeText(getBaseContext(), getResources().getString(R.string.movie_removed_placeholder), Toast.LENGTH_LONG).show();
                 movie_favorites_button.setText(getResources().getString(R.string.add_favorites));
