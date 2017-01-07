@@ -6,8 +6,11 @@ import android.preference.ListPreference;
 import android.preference.Preference;
 import android.preference.PreferenceFragment;
 import android.preference.PreferenceManager;
+import android.support.v4.app.NavUtils;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.MenuItem;
 
 /**
  * Created by dnbhatia on 12/15/2016.
@@ -18,7 +21,22 @@ public class SettingsActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_settings);
-        Log.v(SettingsActivity.class.getName(),"6");
+        ActionBar actionBar = this.getSupportActionBar();
+
+        // Set the action bar back button to look like an up button
+        if (actionBar != null) {
+            actionBar.setDisplayHomeAsUpEnabled(true);
+        }
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+        // When the home button is pressed, take the user back to the VisualizerActivity
+        if (id == android.R.id.home) {
+            NavUtils.navigateUpFromSameTask(this);
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     public static class MoviePreferenceFragment extends PreferenceFragment implements Preference.OnPreferenceChangeListener {
@@ -35,7 +53,6 @@ public class SettingsActivity extends AppCompatActivity {
         public boolean onPreferenceChange(Preference preference, Object value) {
 
             String stringValue = value.toString();
-            Log.v(SettingsActivity.class.getName(), "1"+stringValue);
             if (preference instanceof ListPreference) {
                 ListPreference listPreference = (ListPreference) preference;
                 int prefIndex = listPreference.findIndexOfValue(stringValue);
@@ -51,7 +68,6 @@ public class SettingsActivity extends AppCompatActivity {
             return true;
         }
         private void bindPreferenceSummaryToValue(Preference preference) {
-            Log.v(SettingsActivity.class.getName(),"2");
             preference.setOnPreferenceChangeListener(this);
             SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(preference.getContext());
             String preferenceString = preferences.getString(preference.getKey(), "");

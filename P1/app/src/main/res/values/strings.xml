@@ -14,6 +14,9 @@
     <!-- Label for order-by most recent option [CHAR LIMIT=20] -->
     <string name="settings_order_by_top_rated_label">Highest Rated</string>
     <string name="settings_order_by_top_rated_value" translatable="false">topRated</string>
+
+    <string name="settings_order_by_favorites_label">My Favorites</string>
+
     <string name="settings_menu_item">settings</string>
     <string name="settings_title">Settings</string>
     <string name="movie_poster_content">This resource is for Movie Posters</string>
@@ -25,5 +28,21 @@
     <string name="original_synopsis">Plot</string>
     <string name="original_release_date">Release Date</string>
     <string name="vote_rating">User Rating</string>
+    <string name="movie_details_activity">Movie Details</string>
+    <string name="dummy_movie_text">Movie Title</string>
+    <string name="dummy_rating">10/10</string>
+    <string name="dummy_release_date">2016</string>
+    <string name="dummy_trailer">Trailer</string>
+    <string name="movie_video_section_label">Trailers:</string>
+    <string name="review_content_dummy">This is dummy review content....</string>
+    <string name="review_author_dummy">Dummy Author</string>
+    <string name="review_read_more">Read More..</string>
+    <string name="movie_review_section_label">Reviews</string>
+    <string name="add_favorites">Add to Favorites</string>
+    <string name="movie_inserted_placeholder">Success! Movie inserted in Database.</string>
+    <string name="remove_favorites">Remove from Favorites</string>
+    <string name="settings_order_by_favorites_values">favorites</string>
+    <string name="no_favorites_text">Hi, it seems you don\'t have any favorite movies currently. Add some favorite movies as these can be fetched any time even without internet         connection.</string>
+    <string name="movie_removed_placeholder">Selected movie is no more a favorite</string>
 
 </resources>
