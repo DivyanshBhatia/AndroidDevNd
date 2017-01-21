@@ -20,3 +20,7 @@ Go to https://github.com/DivyanshBhatia/ud851_stockHawk
 -----------------------------------------------------------------------------------------------------------------
 ## For Project P3 (Joke Teller App)
 Go to https://github.com/DivyanshBhatia/ud851_jokeTeller
+
+## For Project P4 (Feed Reader App)
+Go to https://github.com/DivyanshBhatia/ud851_feedReader
+-----------------------------------------------------------------------------------------------------------------
