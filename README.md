@@ -27,3 +27,7 @@ Go to https://github.com/DivyanshBhatia/ud851_jokeTeller
 Go to https://github.com/DivyanshBhatia/ud851_feedReader
 
 --------------------------------------------------------------------------------------------------------------------
+## For Project (Inventory App):
+Go to https://github.com/DivyanshBhatia/InventoryApp.git
+
+--------------------------------------------------------------------------------------------------------------------
